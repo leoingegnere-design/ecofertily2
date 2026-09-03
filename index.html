@@ -1,607 +1,1482 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-<meta name="theme-color" content="#1A3A5C">
-<title>Simulatore Fertilità - Dott. Luigi Montano</title>
-<style>
-  * { box-sizing: border-box; }
-  body {
-    font-family: "Helvetica Neue", Arial, sans-serif;
-    color: #16314D; background: #EEF2F5;
-    margin: 0; padding: 0; line-height: 1.6;
-    -webkit-font-smoothing: antialiased;
-  }
-  header {
-    background: linear-gradient(180deg, #1A3A5C 0%, #14304E 100%);
-    color: #fff; padding: 34px 32px 28px;
-  }
-  header .eyebrow {
-    font-size: 11px; letter-spacing: 0.10em; text-transform: uppercase;
-    color: #8FB0CC; margin-bottom: 10px; font-weight: 600;
-  }
-  header h1 { margin: 0 0 8px; font-size: 23px; font-weight: 500; max-width: 640px; }
-  header p { margin: 0; font-size: 13px; color: #B7C6D3; max-width: 620px; }
-  .wrap { max-width: 800px; margin: 0 auto; padding: 24px; }
-  .card {
-    background: #fff; border: 1px solid #D9E2E9; border-radius: 12px;
-    padding: 20px 22px; margin-bottom: 18px;
-    box-shadow: 0 1px 2px rgba(20,48,78,0.04);
-  }
-  .card h3 { margin: 0 0 4px; font-size: 15.5px; font-weight: 600; color: #14304E; }
-  .card .src {
-    font-size: 11.5px; color: #6C8299; margin-bottom: 14px;
-    padding-bottom: 10px; border-bottom: 1px solid #EEF2F5;
-  }
-  .preface-list { font-size: 13px; margin: 0 0 4px; padding-left: 20px; }
-  .preface-list li { margin-bottom: 8px; }
-  .tabs {
-    display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap;
-    background: #fff; padding: 6px; border-radius: 12px; border: 1px solid #D9E2E9;
-  }
-  .tab-btn {
-    flex: 1; min-width: 130px; padding: 9px 10px; font-size: 12.5px;
-    background: transparent; border: none; border-radius: 8px;
-    color: #46617E; cursor: pointer; text-align: center; font-weight: 500;
-    transition: all 0.2s ease;
-  }
-  .tab-btn.active { background: #1A3A5C; color: #fff; }
-  .panel { display: none; }
-  .panel.active { display: block; animation: fadeIn 0.3s ease; }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-  label.item {
-    display: flex; align-items: center; gap: 10px; font-size: 14px;
-    padding: 8px 0; border-bottom: 1px solid #F1F4F6; cursor: pointer;
-  }
-  label.item:last-child { border-bottom: none; }
-  label.item input[type="checkbox"] { width: 18px; height: 18px; accent-color: #1A3A5C; cursor: pointer; }
-  label.item span.detail { margin-left: auto; font-size: 12px; color: #6C8299; }
-  .results { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0; }
-  .metric { background: #EEF3F7; border-radius: 10px; padding: 14px; text-align: center; }
-  .metric .label { font-size: 11.5px; color: #3C5A75; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.03em; }
-  .metric .value { font-size: 23px; font-weight: 600; color: #14304E; }
-  .progress-bar { margin-top: 8px; background: #D9E2E9; height: 6px; border-radius: 3px; overflow: hidden; }
-  .progress-fill { height: 100%; background: #1A3A5C; border-radius: 3px; transition: width 0.6s ease; }
-  .env-row { display: flex; gap: 8px; margin: 14px 0; }
-  .env-btn {
-    flex: 1; padding: 10px; border: 1px solid #B7C6D3; border-radius: 9px;
-    background: #fff; color: #1A3A5C; font-size: 13px; cursor: pointer; font-weight: 500;
-    transition: all 0.2s ease;
-  }
-  .env-btn.active { background: #A32D2D; color: #fff; border-color: #A32D2D; }
-  .env-btn.active.low { background: #3B6D11; border-color: #3B6D11; }
-  .env-note { font-size: 13px; padding: 12px 14px; border-radius: 10px; background: #F7F9FA; }
-  .info-box {
-    font-size: 13px; padding: 12px 14px; border-radius: 10px; background: #EEF3F7;
-    border-left: 3px solid #1A3A5C; margin-top: 12px;
-  }
-  .info-box strong { color: #14304E; }
-  .qual-tag {
-    display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 12px;
-    background: #E1F5EE; color: #085041; margin: 2px 6px 2px 0;
-  }
-  .qual-tag.down { background: #FCEBEB; color: #791F1F; }
-  .disclaimer {
-    font-size: 12px; color: #6C8299; background: #FDF6E9; border: 1px solid #F0DFB0;
-    border-radius: 9px; padding: 10px 12px; margin-top: 12px;
-  }
-  .disclaimer-top {
-    font-size: 12.5px; color: #791F1F; background: #FCEBEB; border: 1px solid #F5C6C6;
-    border-radius: 9px; padding: 12px 14px; margin-bottom: 18px;
-  }
-  .refs { font-size: 12.5px; color: #3C5A75; }
-  .refs ol { padding-left: 18px; }
-  .refs li { margin-bottom: 10px; }
-  footer { text-align: center; font-size: 11px; color: #6C8299; padding: 22px; }
-  .section-title { font-size: 13px; font-weight: 600; color: #14304E; margin: 22px 0 10px; text-transform: uppercase; letter-spacing: 0.04em; }
-  .quicknav {
-    padding: 7px 14px; background: #fff; border: 1px solid #B7C6D3; border-radius: 20px;
-    color: #1A3A5C; text-decoration: none; font-weight: 500; display: inline-block;
-  }
-  .quicknav:hover { background: #EEF3F7; }
-  html { scroll-behavior: smooth; }
-  .slider-row { margin: 14px 0; }
-  .slider-row label { font-size: 14px; font-weight: 500; color: #14304E; display: block; margin-bottom: 6px; }
-  .slider-row input[type="range"] { width: 100%; accent-color: #1A3A5C; }
-  .slider-val { font-size: 18px; font-weight: 600; color: #1A3A5C; }
-
-  /* === SAMSUNG FOLD: schermo piegato (stretto) === */
-  @media (max-width: 600px) {
-    header { padding: 24px 18px 20px; }
-    header h1 { font-size: 19px; }
-    header p { font-size: 12.5px; }
-    .wrap { padding: 14px; }
-    .card { padding: 16px; }
-    .card h3 { font-size: 15px; }
-    .tabs { flex-direction: column; gap: 4px; }
-    .tab-btn { width: 100%; padding: 12px 10px; font-size: 13px; }
-    .results { grid-template-columns: 1fr; }
-    .env-row { flex-direction: column; gap: 6px; }
-    .env-btn { padding: 13px; font-size: 13.5px; }
-    label.item { padding: 11px 0; font-size: 15px; }
-    label.item span.detail { display: block; margin-left: 0; margin-top: 3px; }
-    .quicknav { padding: 9px 14px; font-size: 12px; }
-    .metric .value { font-size: 20px; }
-  }
-  /* === SAMSUNG FOLD: schermo aperto (largo) === */
-  @media (min-width: 601px) and (max-width: 900px) {
-    .wrap { max-width: 100%; padding: 20px; }
-    .results { grid-template-columns: 1fr 1fr; }
-  }
-</style>
+<meta http-equiv="Content-Language" content="en">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>L'Opera del Dott. Luigi Montano - Innovazione e Ricerca per la Fertilità</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #1A3A5C;
+            --secondary-color: #A32D2D;
+            --accent-color: #3B6D11;
+            --text-dark: #14304E;
+            --text-light: #B7C6D3;
+            --bg-light: #EEF2F5;
+            --bg-card: #FFFFFF;
+            --border-color: #D9E2E9;
+            --glass-bg: rgba(255, 255, 255, 0.15);
+            --glass-border: rgba(255, 255, 255, 0.2);
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Montserrat', sans-serif;
+            color: var(--text-dark);
+            background: var(--bg-light);
+            line-height: 1.6;
+            scroll-behavior: smooth;
+        }
+        /* Utility Classes */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        .section-padding {
+            padding: 80px 0;
+        }
+        .text-center {
+            text-align: center;
+        }
+        .mb-4 {
+            margin-bottom: 1.5rem;
+        }
+        .mb-6 {
+            margin-bottom: 2.5rem;
+        }
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeIn 0.8s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        /* Header & Navbar */
+        .header-hero {
+            background: linear-gradient(180deg, var(--primary-color) 0%, #14304E 100%);
+            color: #FFFFFF;
+            padding: 120px 0 80px;
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+        }
+        .header-hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=1600&q=80') no-repeat center center/cover;
+            opacity: 0.22;
+            z-index: 0;
+        }
+        .header-hero .content {
+            position: relative;
+            z-index: 1;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .header-hero .eyebrow {
+            font-size: 14px;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: #8FB0CC;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        .header-hero h1 {
+            font-family: 'Playfair Display', serif;
+            margin: 0 0 20px;
+            font-size: 3.5rem;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+        .header-hero p {
+            margin: 0;
+            font-size: 1.2rem;
+            color: var(--text-light);
+            max-width: 700px;
+            margin: 0 auto 30px;
+        }
+        .cta-button {
+            display: inline-block;
+            background: var(--secondary-color);
+            color: #FFFFFF;
+            padding: 15px 30px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(163, 45, 45, 0.3);
+        }
+        .cta-button:hover {
+            background: #CC3333;
+            transform: translateY(-3px);
+            box-shadow: 0 12px 25px rgba(163, 45, 45, 0.4);
+        }
+        .navbar {
+            position: sticky;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 15px 0;
+            transition: all 0.3s ease;
+        }
+        .navbar .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .navbar .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        .navbar .logo:hover {
+            color: var(--secondary-color);
+        }
+        .navbar-links {
+            list-style: none;
+            display: flex;
+            gap: 30px;
+        }
+        .navbar-links a {
+            color: var(--text-dark);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1rem;
+            position: relative;
+            transition: color 0.3s ease;
+        }
+        .navbar-links a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            background: var(--secondary-color);
+            bottom: -5px;
+            left: 0;
+            transition: width 0.3s ease;
+        }
+        .navbar-links a:hover::after,
+        .navbar-links a.active::after {
+            width: 100%;
+        }
+        .navbar-links a:hover,
+        .navbar-links a.active {
+            color: var(--secondary-color);
+        }
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+            gap: 5px;
+        }
+        .hamburger span {
+            width: 25px;
+            height: 3px;
+            background: var(--primary-color);
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+        /* Main Content Styling */
+        .content-section {
+            display: none;
+            padding: 60px 0;
+            animation: fadeIn 0.8s ease-out forwards;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(20, 48, 78, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(20, 48, 78, 0.1);
+        }
+        .card h2, .card h3 {
+            font-family: 'Playfair Display', serif;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        .card h2 {
+            font-size: 2.2rem;
+            text-align: center;
+        }
+        .card h3 {
+            font-size: 1.6rem;
+        }
+        .card p {
+            font-size: 1rem;
+            margin-bottom: 15px;
+        }
+        .card .src {
+            font-size: 0.85rem;
+            color: #6C8299;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #EEF2F5;
+        }
+        .info-box {
+            font-size: 1rem;
+            padding: 20px;
+            border-radius: 12px;
+            background: #EEF3F7;
+            border-left: 5px solid var(--primary-color);
+            margin-top: 20px;
+            line-height: 1.5;
+        }
+        .info-box strong {
+            color: var(--text-dark);
+        }
+        .image-container {
+            margin: 30px 0;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+        .image-container img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        .video-analysis {
+            margin-top: 40px;
+        }
+        .video-analysis h3 {
+            color: var(--secondary-color);
+            margin-bottom: 20px;
+        }
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+        .video-item {
+            background: var(--bg-card);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+        }
+        .video-item:hover {
+            transform: translateY(-5px);
+        }
+        .video-item video {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            display: block;
+        }
+        .video-item .video-info {
+            padding: 20px;
+        }
+        .video-item .video-info h4 {
+            font-size: 1.1rem;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        .video-item .video-info p {
+            font-size: 0.9rem;
+            color: #555;
+            margin-bottom: 15px;
+        }
+        .video-item .video-info a {
+            color: var(--secondary-color);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: color 0.3s ease;
+        }
+        .video-item .video-info a:hover {
+            color: #CC3333;
+        }
+        /* Simulatore Specifics */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            background: var(--bg-card);
+            padding: 10px;
+            border-radius: 15px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 8px rgba(20, 48, 78, 0.03);
+        }
+        .tab-btn {
+            flex: 1;
+            min-width: 150px;
+            padding: 12px 15px;
+            font-size: 1rem;
+            background: transparent;
+            border: none;
+            border-radius: 10px;
+            color: #46617E;
+            cursor: pointer;
+            text-align: center;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .tab-btn:hover {
+            background: #F1F4F6;
+            color: var(--primary-color);
+        }
+        .tab-btn.active {
+            background: var(--primary-color);
+            color: #FFFFFF;
+            box-shadow: 0 4px 10px rgba(26, 58, 92, 0.2);
+        }
+        .panel {
+            display: none;
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+        .panel.active {
+            display: block;
+        }
+        label.item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 1rem;
+            padding: 12px 0;
+            border-bottom: 1px solid #F1F4F6;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        label.item:hover {
+            background-color: #F7F9FA;
+        }
+        label.item:last-child {
+            border-bottom: none;
+        }
+        label.item span.detail {
+            margin-left: auto;
+            font-size: 0.9rem;
+            color: #6C8299;
+        }
+        input[type="checkbox"] {
+            transform: scale(1.2);
+            margin-right: 5px;
+            accent-color: var(--primary-color);
+        }
+        .results {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .metric {
+            background: #EEF3F7;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(20, 48, 78, 0.03);
+        }
+        .metric .label {
+            font-size: 0.9rem;
+            color: #3C5A75;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+        }
+        .metric .value {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+        .env-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .env-btn {
+            padding: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            background: var(--bg-card);
+            color: var(--primary-color);
+            font-size: 1rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .env-btn:hover {
+            background: #F1F4F6;
+        }
+        .env-btn.active {
+            background: var(--secondary-color);
+            color: #FFFFFF;
+            border-color: var(--secondary-color);
+            box-shadow: 0 4px 10px rgba(163, 45, 45, 0.2);
+        }
+        .env-btn.active.low {
+            background: var(--accent-color);
+            border-color: var(--accent-color);
+            box-shadow: 0 4px 10px rgba(59, 109, 17, 0.2);
+        }
+        .env-note {
+            font-size: 0.95rem;
+            padding: 15px 20px;
+            border-radius: 10px;
+            background: #F7F9FA;
+            margin-top: 15px;
+            border: 1px solid #E1E8EE;
+        }
+        .qual-tag {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin: 5px 8px 5px 0;
+            font-weight: 500;
+        }
+        .qual-tag.up {
+            background: #E1F5EE;
+            color: #085041;
+        }
+        .qual-tag.down {
+            background: #FCEBEB;
+            color: #791F1F;
+        }
+        .disclaimer {
+            font-size: 0.85rem;
+            color: #6C8299;
+            background: #FDF6E9;
+            border: 1px solid #F0DFB0;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 25px;
+        }
+        .refs {
+            font-size: 0.9rem;
+            color: #3C5A75;
+            margin-top: 40px;
+        }
+        .refs h3 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.4rem;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+        .refs ol {
+            padding-left: 25px;
+            list-style-type: decimal;
+        }
+        .refs li {
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+        .refs li a {
+            color: var(--secondary-color);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        .refs li a:hover {
+            color: #CC3333;
+            text-decoration: underline;
+        }
+        /* Footer */
+        footer {
+            background: var(--primary-color);
+            color: var(--text-light);
+            padding: 60px 0 30px;
+            text-align: center;
+        }
+        footer .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            align-items: flex-start;
+            text-align: left;
+        }
+        footer .footer-col {
+            flex: 1;
+            min-width: 250px;
+            margin: 20px;
+        }
+        footer .footer-col h4 {
+            font-size: 1.2rem;
+            color: #FFFFFF;
+            margin-bottom: 25px;
+            position: relative;
+        }
+        footer .footer-col h4::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -8px;
+            width: 50px;
+            height: 2px;
+            background-color: var(--secondary-color);
+        }
+        footer .footer-col ul {
+            list-style: none;
+        }
+        footer .footer-col ul li:not(:last-child) {
+            margin-bottom: 10px;
+        }
+        footer .footer-col ul li a {
+            color: var(--text-light);
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+        footer .footer-col ul li a:hover {
+            color: #FFFFFF;
+            padding-left: 8px;
+        }
+        footer .social-links a {
+            display: inline-block;
+            height: 40px;
+            width: 40px;
+            background-color: rgba(255, 255, 255, 0.2);
+            margin: 0 10px 10px 0;
+            text-align: center;
+            line-height: 40px;
+            border-radius: 50%;
+            color: #FFFFFF;
+            transition: all 0.3s ease;
+        }
+        footer .social-links a:hover {
+            color: var(--primary-color);
+            background-color: #FFFFFF;
+        }
+        footer .copy {
+            margin-top: 50px;
+            font-size: 0.8rem;
+            color: #8FB0CC;
+        }
+        /* Modals Styling */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(14, 30, 48, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .modal-backdrop.open {
+            display: flex;
+            opacity: 1;
+        }
+        .modal-container {
+            background: var(--bg-card);
+            border-radius: 16px;
+            max-width: 650px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+            border: 1px solid var(--border-color);
+            position: relative;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        .modal-backdrop.open .modal-container {
+            transform: translateY(0);
+        }
+        .modal-header {
+            padding: 20px 25px;
+            border-bottom: 1px solid #EEF2F5;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            background: #FFFFFF;
+            z-index: 2;
+        }
+        .modal-header h3 {
+            font-family: 'Playfair Display', serif;
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            margin: 0;
+        }
+        .modal-close {
+            background: transparent;
+            border: none;
+            font-size: 1.8rem;
+            line-height: 1;
+            color: #6C8299;
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+        .modal-close:hover {
+            color: var(--secondary-color);
+            background: #F1F4F6;
+        }
+        .modal-body {
+            padding: 25px;
+            font-size: 0.95rem;
+            color: #2F4256;
+            line-height: 1.7;
+        }
+        .modal-body h4 {
+            color: var(--primary-color);
+            font-size: 1.05rem;
+            margin: 15px 0 8px;
+        }
+        .modal-body h4:first-child {
+            margin-top: 0;
+        }
+        .modal-body p {
+            margin-bottom: 12px;
+        }
+        .modal-body ul {
+            padding-left: 20px;
+            margin-bottom: 15px;
+        }
+        .modal-body li {
+            margin-bottom: 6px;
+        }
+        .modal-footer {
+            padding: 15px 25px;
+            border-top: 1px solid #EEF2F5;
+            text-align: right;
+            background: #FAFBFD;
+        }
+        .modal-btn {
+            padding: 10px 22px;
+            background: var(--primary-color);
+            color: #fff;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: background 0.2s ease;
+        }
+        .modal-btn:hover {
+            background: #14304E;
+        }
+        /* Mobile Responsiveness */
+        @media (max-width: 992px) {
+            .navbar-links {
+                display: none;
+                flex-direction: column;
+                width: 100%;
+                background: var(--bg-card);
+                position: absolute;
+                top: 70px;
+                left: 0;
+                padding: 20px;
+                border-top: 1px solid var(--border-color);
+                box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+            }
+            .navbar-links.active {
+                display: flex;
+            }
+            .navbar-links a {
+                padding: 10px 0;
+                border-bottom: 1px solid #f0f0f0;
+            }
+            .navbar-links a:last-child {
+                border-bottom: none;
+            }
+            .hamburger {
+                display: flex;
+            }
+            .header-hero h1 {
+                font-size: 2.5rem;
+            }
+            .header-hero p {
+                font-size: 1rem;
+            }
+            .cta-button {
+                padding: 12px 25px;
+                font-size: 1rem;
+            }
+            .section-padding {
+                padding: 60px 0;
+            }
+            .card {
+                padding: 20px;
+            }
+            .card h2 {
+                font-size: 1.8rem;
+            }
+            .card h3 {
+                font-size: 1.4rem;
+            }
+            .tabs {
+                flex-direction: column;
+                gap: 5px;
+            }
+            .tab-btn {
+                width: 100%;
+                padding: 12px 10px;
+                font-size: 0.95rem;
+            }
+            .results {
+                grid-template-columns: 1fr;
+            }
+            .metric .value {
+                font-size: 1.8rem;
+            }
+            .env-grid {
+                grid-template-columns: 1fr;
+            }
+            label.item {
+                flex-wrap: wrap;
+            }
+            label.item span.detail {
+                margin-left: 0;
+                width: 100%;
+                margin-top: 5px;
+            }
+            .video-grid {
+                grid-template-columns: 1fr;
+            }
+            footer .container {
+                flex-direction: column;
+                align-items: center;
+            }
+            footer .footer-col {
+                text-align: center;
+                margin-bottom: 30px;
+            }
+            footer .footer-col h4::after {
+                left: 50%;
+                transform: translateX(-50%);
+            }
+        }
+        @media (max-width: 600px) {
+            .container {
+                padding: 0 15px;
+            }
+            .header-hero {
+                padding: 100px 0 60px;
+            }
+            .header-hero h1 {
+                font-size: 2rem;
+            }
+            .header-hero p {
+                font-size: 0.9rem;
+            }
+            .navbar .logo {
+                font-size: 1.5rem;
+            }
+            .section-padding {
+                padding: 40px 0;
+            }
+            .card {
+                padding: 15px;
+            }
+            .card h2 {
+                font-size: 1.5rem;
+            }
+            .card h3 {
+                font-size: 1.2rem;
+            }
+            .info-box {
+                padding: 15px;
+            }
+            .qual-tag {
+                font-size: 0.8rem;
+                padding: 4px 10px;
+            }
+            .disclaimer, .refs {
+                font-size: 0.8rem;
+            }
+        }
+    </style>
 </head>
-<body>
-
-<header>
-  <div class="eyebrow">Strumento dimostrativo - In omaggio al Dott. Luigi Montano</div>
-  <h1>Simulatore interattivo: nutrizione, intervento dietetico e ambiente sulla fertilità</h1>
-  <p>Costruito su dati pubblicati e verificati su PubMed. Ogni valore riporta la fonte puntuale utilizzata.</p>
-</header>
-
-<div class="wrap">
-
-<div class="disclaimer-top">
-  ⚠️ <strong>Avvertenza.</strong> Questo strumento ha scopo esclusivamente educativo e divulgativo. Non sostituisce in alcun modo il parere di un medico, una diagnosi o un piano terapeutico. Per qualsiasi decisione sulla propria salute riproduttiva, consultare un professionista qualificato.
-</div>
-
-<div style="background:#EEF3F7; border-left:4px solid #1A3A5C; border-radius:10px; padding:18px 22px; margin-bottom:20px;">
-  <div style="font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:#3C5A75; font-weight:600; margin-bottom:6px;">Dedica</div>
-  <p style="font-size:14px; margin:0 0 10px; color:#14304E;">
-    Dedicato al Dott. Luigi Montano — UroAndrologo dell'ASL Salerno, Past President della Società Italiana della Riproduzione Umana (SIRU, 2017-2023), PhD in Biologia dell'Evoluzione ed Ecologia, Abilitazione Scientifica Nazionale a Professore Ordinario in Urologia (giugno 2026) — con gratitudine per il suo lavoro pionieristico nel Progetto di Ricerca EcoFoodFertility e per l'ispirazione che trasmette a chi, come me, crede nella prevenzione.
-  </p>
-  <p style="font-size:13.5px; margin:0; color:#3C5A75;">
-    Il Dott. Montano è stato il primo autore al mondo a pubblicare la presenza di microplastiche nell'apparato urinario e riproduttivo maschile e femminile (urine 2022, liquido seminale 2023, fluido follicolare 2025), ha introdotto il paradigma della MEDEUBIOTICA — la Dieta Mediterranea basata su alimenti biologici come scudo biologico per la salute riproduttiva — e ha coordinato il biomonitoraggio di aree a rischio ambientale in tutta Italia attraverso la Rete Interdisciplinare per la Salute Ambientale e Riproduttiva (RISAR). Ogni dato riportato cita la fonte originale.
-  </p>
-</div>
-
-<div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:20px; font-size:12.5px;">
-  <a href="#omaggio" class="quicknav">Il lavoro di Montano</a>
-  <a href="#impatto" class="quicknav">Impatto internazionale</a>
-  <a href="#simulatori" class="quicknav">Simulatori interattivi</a>
-  <a href="#riferimenti" class="quicknav">Riferimenti</a>
-</div>
-
-<!-- ====== PREFAZIONE ====== -->
-<div id="prefazione" class="card" style="border-left: 4px solid #1A3A5C;">
-  <h3>Prefazione</h3>
-  <p style="font-size:13.5px; margin:0 0 10px;">Questo strumento traduce in forma interattiva alcuni risultati pubblicati sulla relazione tra nutrizione, intervento dietetico, esposizione ambientale e parametri di fertilità, maschile e femminile. È pensato come spunto di discussione, non come sintesi esaustiva della letteratura né come strumento diagnostico o predittivo per singoli individui.</p>
-  <p style="font-size:13.5px; margin:0 0 10px;"><strong>Composizione.</strong> Una sezione dedicata al suo lavoro pionieristico sulle microplastiche e all'impatto internazionale della sua ricerca, seguita da sei sezioni interattive: (1) nutrienti e integratori sulla fertilità maschile, (2) il suo studio randomizzato controllato FASt su dieta mediterranea e attività fisica, (3) esposizione atmosferica e ambientale, (4) interferenti endocrini e stile di vita, (5) fertilità femminile secondo il Fertility Diet Score, (6) cambiamento climatico e fertilità.</p>
-  <p style="font-size:13.5px; margin:0 0 6px;"><strong>Limiti metodologici da tenere presenti.</strong></p>
-  <ul class="preface-list">
-    <li>Nella sezione "Nutrienti", ciascun valore deriva da uno studio RCT che ha testato il nutriente singolarmente contro placebo. Selezionandone più di uno, lo strumento ne somma gli effetti in modo lineare solo a scopo illustrativo: la combinazione additiva non è stata dimostrata negli studi originali.</li>
-    <li>Nella sezione "RCT FASt", i risultati sono riportati solo in direzione e significatività statistica, così come disponibili nell'abstract pubblico.</li>
-    <li>Nella sezione "Esposizione ambientale", i confronti tra aree si basano su studi osservazionali di biomonitoraggio (non randomizzati).</li>
-    <li>Nella sezione "Fertilità femminile", la riduzione del rischio al variare del numero di fattori è un'interpolazione lineare tra 0 e 5 fattori, a scopo visivo; il dato certificato dello studio riguarda solo il gruppo con 5 o più fattori su 5 (-66%).</li>
-  </ul>
-  <p style="font-size:13.5px; margin:0;">L'elenco completo dei riferimenti, con PMID/DOI quando disponibile, è in fondo al documento.</p>
-</div>
-
-<!-- ====== OMAGGIO ====== -->
-<div id="omaggio" class="card" style="border-left: 4px solid #A32D2D;">
-  <h3>Il lavoro pionieristico del Dott. Montano: tre prime evidenze mondiali</h3>
-  <div class="src">Verificato su PubMed e ScienceDirect — tre scoperte "prime al mondo" del suo gruppo di ricerca</div>
-
-  <div class="info-box"><strong>Prima evidenza mondiale di microplastiche nelle urine umane (2022).</strong> Montano L. "First Evidence of Microplastics in Human Urine, a Preliminary Study of Intake in the Human Body." Toxics. 2023;11(1):40. PMID 36668766. Quattro frammenti di microplastiche pigmentate (4-15 micrometri) identificati in campioni di urine umane tramite spettroscopia Raman. Prima scoperta della trilogia che avrebbe poi portato all'esplorazione del sistema riproduttivo.</div>
-
-  <div class="info-box"><strong>Prima evidenza mondiale di microplastiche nel liquido seminale umano (2023).</strong> Montano L., Giorgini E., Notarstefano V., Notari T., Ricciardi M., Piscopo M., Motta O. Raman Microspectroscopy evidence of microplastics in human semen. Science of the Total Environment. 2023;901:165922. PMID 37532047. Su campioni di uomini residenti in un'area inquinata della Campania, 16 frammenti di microplastiche pigmentate (2-6 micrometri) in 6 campioni su 10, con composizione chimica identificata tramite spettroscopia Raman (polipropilene, polietilene, PET, polistirene, PVC, policarbonato, POM, acrilico).</div>
-
-  <div class="info-box"><strong>Prima evidenza mondiale di microplastiche nel fluido follicolare ovarico umano (2025).</strong> Montano L., Raimondo S., Piscopo M., Ricciardi M., Guglielmino A., Chamayou S., Gentile R., Gentile M., Rapisarda P., Oliveri Conti G., Ferrante M., Motta O. First evidence of microplastics in human ovarian follicular fluid: an emerging threat to female fertility. Ecotoxicology and Environmental Safety. 2025;291:117868. PMID 39947063. Su 18 donne sottoposte a riproduzione assistita, microplastiche in 14 campioni su 18, con media di 2.191 particelle/mL e diametro medio di 4.48 micrometri. Correlazione tra concentrazione di microplastiche e livelli di FSH (p&lt;0.05).</div>
-
-  <div class="info-box"><strong>MEDEUBIOTICA — il paradigma della resilienza.</strong> Montano L. et al. "Mediterranean Diet as a Shield against Male Infertility and Environmental Pollution." Nutrients. 2022. PMID 35163492. Il Dott. Montano ha coniato il termine MEDEUBIOTICA (MEditerranean DIEt Biological/organic) per descrivere la Dieta Mediterranea basata su alimenti biologici come strumento di tutela della salute riproduttiva e del benessere complessivo, capace di controbilanciare gli inquinanti ambientali.</div>
-
-  <div class="info-box"><strong>Riconoscimenti pubblici verificati.</strong> Premio UNESCO per il Progetto EcoFoodFertility (cerimonia novembre 2023, Università Federico II di Napoli; riconoscimento formalizzato nel 2024). Premio "Paladino Italiano della Salute" conferito al Campidoglio di Roma in <strong>tre edizioni: 2021, 2024 e 2026</strong> (terza volta consecutiva), quest'ultima con Comitato Scientifico presieduto dal Dott. Filippo Anelli (Presidente Nazionale FNOMCeO), motivata specificamente dalle ricerche più recenti del suo gruppo su microplastiche in urine, liquido seminale e fluido follicolare femminile. Abilitazione Scientifica Nazionale a Professore Ordinario in Urologia (giugno 2026).</div>
-</div>
-
-<!-- ====== IMPATTO INTERNAZIONALE ====== -->
-<div id="impatto" class="card">
-  <h3>Impatto internazionale: la ricerca che segue la sua scia</h3>
-  <div class="src">Studi indipendenti pubblicati dopo il suo lavoro pionieristico, verificati su PubMed</div>
-  <div class="info-box"><strong>Stati Uniti, 2025.</strong> Kong F., Fang L., Gui Y. et al. Polyethylene and Polyvinyl Chloride Nanoplastics in Human Follicular Fluid and Seminal Plasma: Impact on Fertilization and Sperm Quality. ACS Nano. 2025;19(30):27159-27172. Pubblicato sulla rivista dell'American Chemical Society, cita il suo lavoro del 2023 come riferimento fondativo.</div>
-  <div class="info-box"><strong>Cina, 2023.</strong> Zhao Q., Zhu L., Weng J. et al. Detection and characterization of microplastics in the human testis and semen. Science of the Total Environment. 2023;877:162713.</div>
-  <div class="info-box"><strong>Cina, 2024.</strong> Association of mixed exposure to microplastics with sperm dysfunction: a multi-site study in China. PMID 39342804. Studio multicentrico che collega l'esposizione a PTFE a riduzione di conteggio spermatico totale, concentrazione e motilità progressiva.</div>
-</div>
-
-<!-- ====== SIMULATORI ====== -->
-<div id="simulatori" class="tabs">
-  <button class="tab-btn active" data-tab="nutrienti">1. Nutrienti</button>
-  <button class="tab-btn" data-tab="rct">2. RCT FASt</button>
-  <button class="tab-btn" data-tab="ambiente">3. Ambiente</button>
-  <button class="tab-btn" data-tab="edc">4. Interferenti endocrini</button>
-  <button class="tab-btn" data-tab="donna">5. Fertilità femminile</button>
-  <button class="tab-btn" data-tab="clima">6. Clima</button>
-</div>
-
-<!-- ====== TAB 1: NUTRIENTI ====== -->
-<div id="panel-nutrienti" class="panel active">
-  <div class="card">
-    <h3>Nutrienti e integratori sulla fertilità maschile</h3>
-    <div class="src">Fonte: Salas-Huetos A. et al., meta-analisi di 28 RCT su 1.790 uomini subfertili, Advances in Nutrition 2019 (PMID 30947338)</div>
-    <label class="item"><input type="checkbox" class="nu" data-conc="10.98" data-mot="7.55" checked> Omega-3 <span class="detail">conc. +10.98 M/mL, motilità +7.55%</span></label>
-    <label class="item"><input type="checkbox" class="nu" data-conc="5.93" data-mot="5.30" checked> Coenzima Q10 <span class="detail">conc. +5.93 M/mL, motilità +5.30%</span></label>
-    <label class="item"><input type="checkbox" class="nu" data-conc="1.48" data-mot="7.03"> Zinco <span class="detail">conc. +1.48 M/mL, motilità +7.03%</span></label>
-    <label class="item"><input type="checkbox" class="nu" data-conc="3.91" data-mot="3.30"> Selenio <span class="detail">conc. +3.91 M/mL, motilità +3.30%</span></label>
-    <label class="item"><input type="checkbox" class="nu" data-conc="0" data-mot="7.84"> Carnitina <span class="detail">motilità +7.84%</span></label>
-
-    <div class="results">
-      <div class="metric">
-        <div class="label">Concentrazione spermatica</div>
-        <div class="value" id="out-conc">+0 M/mL</div>
-        <div class="progress-bar"><div class="progress-fill" id="bar-conc" style="width:0%"></div></div>
-      </div>
-      <div class="metric">
-        <div class="label">Motilità totale</div>
-        <div class="value" id="out-mot">+0%</div>
-        <div class="progress-bar"><div class="progress-fill" id="bar-mot" style="width:0%"></div></div>
-      </div>
-    </div>
-    <div class="disclaimer">Ogni valore deriva da uno studio RCT in cui il nutriente è stato testato singolarmente contro placebo. Selezionando più nutrienti insieme, lo strumento ne somma gli effetti in modo lineare solo a scopo illustrativo: la combinazione additiva non è stata dimostrata negli studi originali.</div>
-  </div>
-</div>
-
-<!-- ====== TAB 2: RCT FASt ====== -->
-<div id="panel-rct" class="panel">
-  <div class="card">
-    <h3>Intervento dieta mediterranea + attività fisica (studio FASt)</h3>
-    <div class="src">Fonte: Montano L. et al., European Urology Focus 2021 (PMID 33579652) — RCT su 263 giovani uomini sani in aree fortemente inquinate d'Italia (137 intervento, 126 controllo, 4 mesi)</div>
-    <label class="item"><input type="checkbox" id="rct-toggle" checked> Applica intervento dieta mediterranea + attività fisica (4 mesi)</label>
-    <div id="rct-results" style="margin-top:14px;"></div>
-    <div class="disclaimer">L'abstract pubblico riporta la direzione e la significatività statistica dell'effetto (aumento nel gruppo intervento, diminuzione nel gruppo controllo), non i valori numerici esatti in percentuale.</div>
-  </div>
-</div>
-
-<!-- ====== TAB 3: AMBIENTE ====== -->
-<div id="panel-ambiente" class="panel">
-  <div class="card">
-    <h3>Aree a diversa pressione ambientale</h3>
-    <div class="src">Fonte: Bergamo P. et al., Reproductive Toxicology 2016 (PMID 27592743) — biomonitoraggio Acerra/Oliveto Citra, 110 uomini sani</div>
-    <div class="info-box"><strong>Come lo studio ha classificato le due aree.</strong> La distinzione si basa su indicatori ambientali documentati: presenza di siti di smaltimento illegale di rifiuti, dati di qualità dell'aria, densità industriale e prossimità a fonti di inquinamento accertate. Acerra rientra nell'area nota come "Terra dei Fuochi". Il progetto EcoFoodFertility, attraverso la Rete RISAR, ha ampliato il biomonitoraggio a Brescia, Valle del Sacco, Taranto, Modena, Vicenza (alta esposizione) vs. Cilento, Madonie (bassa esposizione).</div>
-    <div class="env-row">
-      <button class="env-btn low active" data-env="low">Bassa esposizione (Oliveto Citra)</button>
-      <button class="env-btn" data-env="high">Alta esposizione (Acerra)</button>
-    </div>
-    <div class="env-note" id="env-text"></div>
-    <div class="disclaimer">Confronto tra due gruppi di popolazione osservati (studio di biomonitoraggio), non un esperimento con randomizzazione dell'esposizione. Dato aggregato a fini di ricerca, non valutazione del rischio individuale.</div>
-  </div>
-
-  <div class="card">
-    <h3>Tipo di biancheria intima e calore scrotale</h3>
-    <div class="src">Fonte: Minguez-Alarcon L., Chavarro J.E. et al., Human Reproduction 2018 (PMID 30102388) — studio trasversale su 656 uomini</div>
-    <div class="env-row">
-      <button class="env-btn nder-btn low active" data-nder="boxer">Boxer (biancheria larga)</button>
-      <button class="env-btn nder-btn" data-nder="tight">Slip/aderente</button>
-    </div>
-    <div class="env-note" id="nder-text"></div>
-    <div class="disclaimer">Studio trasversale: l'associazione non dimostra da sola un rapporto di causa-effetto. La letteratura sul tema non è del tutto concorde (cfr. Munkelwitz e Gilbert, 1998, PMID 9751347).</div>
-  </div>
-
-  <div class="card">
-    <h3>Inquinanti atmosferici e finestre temporali della spermatogenesi</h3>
-    <div class="src">Fonte: Aloisi V., Ceretti E., Zani D. et al., FASt study group, Environmental Research 2025 (DOI 10.1016/j.envres.2025.123108) — coorte prospettica multicentrica, 345 uomini, tre aree inquinate del Nord, Centro e Sud Italia</div>
-    <div class="info-box"><strong>PM2.5 e PM10</strong> nella finestra di 10-14 giorni prima del prelievo sono risultati collegati a concentrazione e conteggio spermatico.</div>
-    <div class="info-box"><strong>Ozono (O3)</strong> è risultato collegato a motilità e morfologia normale nelle finestre di 0-90 e 70-90 giorni, corrispondenti a fasi diverse del ciclo di spermatogenesi (circa 74-90 giorni).</div>
-  </div>
-
-  <div class="card">
-    <h3>Ulteriori biomarcatori dagli studi del gruppo EcoFoodFertility</h3>
-    <div class="info-box"><strong>Frammentazione del DNA spermatico (DFI).</strong> Sia i lavoratori di acciaierie sia i pazienti residenti in area fortemente inquinata mostrano un DFI medio superiore al 30%. Fonte: Bosco L., Notari T., Montano L. et al., Environmental Toxicology and Pharmacology 2018 (PMID 29448163).</div>
-    <div class="info-box"><strong>Lunghezza dei telomeri spermatici (dato non intuitivo).</strong> In uno studio pilota su 112 uomini normospermici (57 area alta esposizione, 55 area bassa), la lunghezza dei telomeri nello sperma è risultata significativamente maggiore nel gruppo ad alta esposizione (p=0.04). Fonte: Vecoli C., Montano L. et al., International Journal of Molecular Sciences 2017 (PMID 28777293).</div>
-  </div>
-</div>
-
-<!-- ====== TAB 4: INTERFERENTI ENDOCRINI ====== -->
-<div id="panel-edc" class="panel">
-  <div class="card">
-    <h3>Interferenti endocrini, fumo e BMI su fertilità maschile e femminile</h3>
-    <div class="src">Fonti: WHO/UNEP State of the Science of Endocrine Disrupting Chemicals 2012; Chavarro et al. Human Reproduction 2009; Sharma et al. Syst Biol Reprod Med 2013; Kort et al. Fertil Steril 2014</div>
-
-    <div class="section-title">Interferenti endocrini (seleziona quelli applicabili)</div>
-    <label class="item"><input type="checkbox" class="edc" data-sperm="-8" data-fsh="0"> BPA (Bisfenolo A) <span class="detail">conc. spermatica -8% (studi osservazionali)</span></label>
-    <label class="item"><input type="checkbox" class="edc" data-sperm="-5" data-fsh="0"> Ftalati <span class="detail">motilità e conc. ridotte (MEHP, DEHP)</span></label>
-    <label class="item"><input type="checkbox" class="edc" data-sperm="-3" data-fsh="0"> Pesticidi (organofosforati) <span class="detail">conc. spermatica -3% in lavoratori esposti</span></label>
-    <label class="item"><input type="checkbox" class="edc" data-sperm="-4" data-fsh="0"> PFAS (sostanze perfluoroalchiliche) <span class="detail">ridotto conteggio e morfologia</span></label>
-
-    <div class="section-title">Stile di vita</div>
-    <label class="item"><input type="checkbox" class="edc" data-sperm="-23" data-fsh="0"> Fumo di tabacco (maschio) <span class="detail">conc. -23%, motilità -13% ( Sharma 2016)</span></label>
-    <label class="item"><input type="checkbox" class="edc" data-sperm="0" data-fsh="0"> Fumo di tabacco (donna) <span class="detail">anticipazione menopausa ~1-2 anni</span></label>
-
-    <div class="slider-row">
-      <label>BMI (Indice di massa corporea): <span class="slider-val" id="bmi-val">25</span> kg/m²</label>
-      <input type="range" id="bmi-slider" min="18" max="40" value="25" step="1">
-    </div>
-
-    <div class="results">
-      <div class="metric"><div class="label">Variazione stimata conc. spermatica</div><div class="value" id="edc-out">0%</div></div>
-      <div class="metric"><div class="label">Rischio BMI</div><div class="value" id="bmi-out" style="font-size:16px;">Normale</div></div>
-    </div>
-    <div class="disclaimer">I valori degli interferenti endocrini derivano da studi osservazionali (non RCT): l'entità dell'effetto varia molto tra studi e non è possibile stabilire un rapporto dose-risposta individuale. Il BMI influisce sulla fertilità di entrambi i sessi: BMI &gt;30 (obesità) riduce significativamente la qualità seminale maschile e aumenta il rischio di disovulazione femminile.</div>
-  </div>
-</div>
-
-<!-- ====== TAB 5: FERTILITÀ FEMMINILE ====== -->
-<div id="panel-donna" class="panel">
-  <div class="card">
-    <h3>Fertility Diet Score — fertilità femminile</h3>
-    <div class="src">Fonte: Chavarro J.E. et al., "The Fertility Diet" (Nurses' Health Study II), Harvard. Fertil Steril 2007;87(3):664-675. Rischio di ovululazione infertility ridotto del 66% con 5 o più fattori su 5.</div>
-
-    <div class="section-title">Seleziona i fattori protettivi della Fertility Diet</div>
-    <label class="item"><input type="checkbox" class="fd" data-id="1" checked> Meno grassi trans, più grassi monoinsaturi</label>
-    <label class="item"><input type="checkbox" class="fd" data-id="2" checked> Più proteine vegetali, meno animali</label>
-    <label class="item"><input type="checkbox" class="fd" data-id="3"> Carboidrati a basso indice glicemico</label>
-    <label class="item"><input type="checkbox" class="fd" data-id="4"> Più ferro da fonti vegetali e integratori</label>
-    <label class="item"><input type="checkbox" class="fd" data-id="5"> Multivitaminico con acido folico</label>
-
-    <div class="slider-row">
-      <label>Età materna: <span class="slider-val" id="age-val">32</span> anni</label>
-      <input type="range" id="age-slider" min="20" max="45" value="32" step="1">
-    </div>
-
-    <div class="results">
-      <div class="metric"><div class="label">Riduzione rischio disovulazione</div><div class="value" id="fd-out">-26%</div></div>
-      <div class="metric"><div class="label">Fattori applicati</div><div class="value" id="fd-count">2/5</div></div>
-    </div>
-    <div class="metric" style="margin-top:8px;"><div class="label">Impatto età materna</div><div class="value" id="age-out" style="font-size:16px;">Fertilità ottimale</div></div>
-    <div class="disclaimer">La riduzione del rischio al variare del numero di fattori è un'interpolazione lineare tra 0 e 5 fattori, a scopo visivo; il dato certificato dello studio riguarda solo il gruppo con 5 o più fattori su 5 (-66%). L'effetto dell'età è basato su dati epidemiologici generali: la fertilità femminile inizia a declinare sensibilmente dopo i 35 anni e più marcatamente dopo i 40.</div>
-  </div>
-</div>
-
-<!-- ====== TAB 6: CAMBIAMENTO CLIMATICO ====== -->
-<div id="panel-clima" class="panel">
-  <div class="card">
-    <h3>Calore ambientale e fertilità maschile</h3>
-    <div class="src">Fonte: Levine H. et al., Human Reproduction Update 2023 (revisione dei trend globali); Thonneau P. et al. sulla temperatura scrotale; IARC monografie</div>
-
-    <div class="info-box"><strong>Calore e spermatogenesi.</strong> La spermatogenesi ottimale avviene a 2-4°C sotto la temperatura corporea. Esposizioni prolungate al calore (saune, bagni caldi, laptop sulle gamba, lavoro in alte temperature ambientali) possono ridurre temporaneamente la qualità seminale. Il recupero avviene in 2-3 mesi (un ciclo spermatogenetico completo).</div>
-
-    <div class="info-box"><strong>Trend globale del conteggio spermatico.</strong> Levine H. et al. (Human Reproduction Update, 2022) hanno documentato un declino globale del 51.6% della concentrazione spermatica dal 1973 al 2018. Sebbene le cause siano multifattoriali (inquinamento chimico, stile di vita, obesità, ecc.), il cambiamento climatico e l'aumento delle temperature ambientali sono considerati fattori con tribuenti.</div>
-
-    <div class="slider-row">
-      <label>Incremento temperatura media ambientale: <span class="slider-val" id="temp-val">+0°C</span></label>
-      <input type="range" id="temp-slider" min="0" max="5" value="0" step="0.5">
-    </div>
-
-    <div class="results">
-      <div class="metric"><div class="label">Stima impatto su conc. spermatica</div><div class="value" id="temp-out">0%</div></div>
-      <div class="metric"><div class="label">Livello di rischio</div><div class="value" id="risk-out" style="font-size:16px;">Nessuno</div></div>
-    </div>
-
-    <div class="info-box"><strong>Stagionalità della fertilità.</strong> Studi europei mostrano che la qualità seminale (concentrazione, motilità, morfologia) è inferiore in estate rispetto all'inverno, coerentemente con l'effetto del calore ambientale sulla spermatogenesi.</div>
-
-    <div class="info-box"><strong>Proiezioni future.</strong> Modelli climatici prevedono un aumento delle temperature medie globali di 1.5-4°C entro il 2100. L'impatto sulla fertilità umana è oggetto di ricerca attiva: il gruppo di Montano ha evidenziato come le aree più inquinate (Terra dei Fuochi, aree industriali) presentino già profili di rischio riproduttivo elevati, e il cambiamento climatico potrebbe amplificare questi effetti.</div>
-
-    <div class="disclaimer">Le stime di impatto del calore sono indicative e basate su principi fisiologici (termoregolazione scrotale) e studi osservazionali di stagionalità. Non esiste un modello quantitativo validato che colleghi direttamente l'incremento di temperatura ambientale globale a una riduzione percentuale precisa del conteggio spermatico individuale. I dati sul declino globale dello sperma sono multifattoriali e non attribuibili esclusivamente al cambiamento climatico.</div>
-  </div>
-</div>
-
-<!-- ====== RIFERIMENTI ====== -->
-<div id="riferimenti" class="card">
-  <h3>Riferimenti bibliografici</h3>
-  <div class="src">Tutti i PMID/DOI sono stati verificati su PubMed/ScienceDirect</div>
-  <div class="refs">
-    <ol>
-      <li><strong>Montano L.</strong> et al. First Evidence of Microplastics in Human Urine, a Preliminary Study of Intake in the Human Body. Toxics. 2023;11(1):40. PMID 36668766.</li>
-      <li><strong>Montano L.</strong> et al. Raman Microspectroscopy evidence of microplastics in human semen. Science of the Total Environment. 2023;901:165922. PMID 37532047.</li>
-      <li><strong>Montano L.</strong> et al. First evidence of microplastics in human ovarian follicular fluid: an emerging threat to female fertility. Ecotoxicology and Environmental Safety. 2025;291:117868. PMID 39947063.</li>
-      <li><strong>Montano L.</strong> et al. Mediterranean Diet as a Shield against Male Infertility and Environmental Pollution. Nutrients. 2022;14(1). PMID 35163492.</li>
-      <li><strong>Montano L.</strong> et al. Effects of a Lifestyle Change Intervention on Semen Quality... (Studio FASt). European Urology Focus. 2021. PMID 33579652.</li>
-      <li><strong>Bergamo P.</strong> et al. Human semen as an early, sensitive biomarker of environmental exposure... Reproductive Toxicology. 2016;66:1-9. PMID 27592743.</li>
-      <li><strong>Bosco L., Notari T., Montano L.</strong> et al. Sperm DNA fragmentation: an early and reliable marker of air pollution. Environmental Toxicology and Pharmacology. 2018;58:243-249. PMID 29448163.</li>
-      <li><strong>Vecoli C., Montano L.</strong> et al. Effects of highly polluted environment on sperm telomere length. International Journal of Molecular Sciences. 2017;18(8):1703. PMID 28777293.</li>
-      <li><strong>Salas-Huetos A.</strong> et al. Dietary nutrients and motility/sperm counts: a systematic review and meta-analysis. Advances in Nutrition. 2019. PMID 30947338.</li>
-      <li><strong>Minguez-Alarcon L., Chavarro J.E.</strong> et al. Type of underwear worn and markers of testicular function... Human Reproduction. 2018. PMID 30102388.</li>
-      <li><strong>Aloisi V., Ceretti E., Zani D.</strong> et al. (FASt study group) Inquinanti atmosferici e finestre della spermatogenesi. Environmental Research. 2025. DOI 10.1016/j.envres.2025.123108.</li>
-      <li><strong>Kong F.</strong> et al. Polyethylene and Polyvinyl Chloride Nanoplastics in Human Follicular Fluid and Seminal Plasma. ACS Nano. 2025;19(30):27159-27172.</li>
-      <li><strong>Chavarro J.E.</strong> et al. Diet and lifestyle in the prevention of ovulatory disorder infertility. Fertil Steril. 2007;87(3):664-675.</li>
-      <li><strong>Levine H.</strong> et al. Temporal trends in sperm count: a systematic review and meta-analysis. Human Reproduction Update. 2022;29(2):157-176.</li>
-      <li><strong>Zhao Q.</strong> et al. Detection and characterization of microplastics in the human testis and semen. Science of the Total Environment. 2023;877:162713.</li>
-    </ol>
-  </div>
-</div>
-
-</div><!-- /wrap -->
-
-<footer>
-  Strumento dimostrativo in omaggio al Dott. Luigi Montano — Progetto EcoFoodFertility<br>
-  Costruito su dati pubblicati e verificati su PubMed. Non è uno strumento diagnostico.<br>
-  © 2026 — ISERA International
-</footer>
-
-<script>
-// ====== TAB SWITCHING ======
-document.querySelectorAll('.tab-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
-  });
-});
-
-// ====== TAB 1: NUTRIENTI ======
-function updateNutrienti() {
-  let conc = 0, mot = 0;
-  document.querySelectorAll('.nu:checked').forEach(el => {
-    conc += parseFloat(el.dataset.conc || 0);
-    mot += parseFloat(el.dataset.mot || 0);
-  });
-  document.getElementById('out-conc').textContent = '+' + conc.toFixed(2) + ' M/mL';
-  document.getElementById('out-mot').textContent = '+' + mot.toFixed(1) + '%';
-  document.getElementById('bar-conc').style.width = Math.min(conc / 25 * 100, 100) + '%';
-  document.getElementById('bar-mot').style.width = Math.min(mot / 35 * 100, 100) + '%';
-}
-document.querySelectorAll('.nu').forEach(el => el.addEventListener('change', updateNutrienti));
-updateNutrienti();
-
-// ====== TAB 2: RCT FASt ======
-const rctToggle = document.getElementById('rct-toggle');
-const rctResults = document.getElementById('rct-results');
-function updateRCT() {
-  if (rctToggle.checked) {
-    rctResults.innerHTML = `
-      <div class="results">
-        <div class="metric">
-          <div class="label">Gruppo intervento</div>
-          <div class="value" style="color:#3B6D11;">↑ Miglioramento</div>
-          <div style="font-size:12px;color:#6C8299;margin-top:4px;">Concentrazione e motilità spermatica aumentate (p&lt;0.05)</div>
+<body translate="no" dir="ltr">
+    <header class="header-hero" id="home">
+        <div class="content container fade-in">
+            <div class="eyebrow">Piattaforma di Ricerca e Valorizzazione</div>
+            <h1>L'Opera Innovativa del Dott. Luigi Montano: Scienza e Prevenzione per la Fertilità</h1>
+            <p>Un tributo al lavoro pionieristico del Dott. Luigi Montano, con approfondimenti sulla sua ricerca, impatto internazionale e strumenti interattivi basati su dati scientifici verificati.</p>
+            <a href="#simulatore" class="cta-button">Esplora il Simulatore</a>
         </div>
-        <div class="metric">
-          <div class="label">Gruppo controllo</div>
-          <div class="value" style="color:#A32D2D;">↓ Peggioramento</div>
-          <div style="font-size:12px;color:#6C8299;margin-top:4px;">Parametri seminali ridotti nel gruppo senza intervento</div>
+    </header>
+    <nav class="navbar">
+        <div class="container">
+            <a href="#home" class="logo">Montano Research</a>
+            <div class="hamburger" onclick="toggleMenu()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <ul class="navbar-links">
+                <li><a href="#home" class="nav-link active" data-target="home">Home</a></li>
+                <li><a href="#opera" class="nav-link" data-target="opera">L'Opera di Montano</a></li>
+                <li><a href="#impatto" class="nav-link" data-target="impatto">Impatto Internazionale</a></li>
+                <li><a href="#simulatore" class="nav-link" data-target="simulatore">Simulatore Interattivo</a></li>
+                <li><a href="#cronologia" class="nav-link" data-target="cronologia">Cronologia e Riferimenti</a></li>
+            </ul>
         </div>
-      </div>
-      <div class="info-box"><strong>Risultato chiave.</strong> La dieta mediterranea basata su alimenti biologici (MEDEUBIOTICA) combinata con attività fisica regolare ha migliorato significativamente i parametri seminali in giovani uomini sani residenti in aree inquinate, controbilanciando l'effetto negativo dell'esposizione ambientale.</div>
-    `;
-  } else {
-    rctResults.innerHTML = `<div class="env-note">Nessun intervento applicato. Il gruppo controllo ha mostrato un peggioramento dei parametri seminali nel corso dei 4 mesi.</div>`;
-  }
-}
-rctToggle.addEventListener('change', updateRCT);
-updateRCT();
+    </nav>
+    <main class="container">
+        <!-- Home Section - Dedica e Introduzione -->
+        <section id="home-content" class="content-section active section-padding">
+            <div class="card" style="border-left: 5px solid var(--primary-color);">
+                <h2 class="text-center">Benvenuti nell'Archivio Scientifico del Dott. Luigi Montano</h2>
+                
+                <!-- Card Foto Ufficiale Dott. Luigi Montano -->
+                <div class="profile-card-wrapper" style="display: flex; justify-content: center; margin: 30px 0;">
+                    <div class="profile-card" style="max-width: 360px; width: 100%; background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 12px 30px rgba(20, 48, 78, 0.16); border: 1px solid var(--border-color); text-align: center; transition: transform 0.3s ease, box-shadow 0.3s ease;">
+                        <div style="width: 100%; height: 460px; overflow: hidden; background: #0e243a; position: relative;">
+                            <img src="https://base44.app/api/apps/69de61d2769998df788ec38b/files/mp/public/69de61d2769998df788ec38b/c91e0e672_aaaaaa.jpg" 
+                                 referrerpolicy="no-referrer"
+                                 alt="Dott. Luigi Montano - UroAndrologo e Ricercatore" 
+                                 title="Dott. Luigi Montano" 
+                                 style="width: 100%; height: 100%; object-fit: cover; object-position: center 15%; display: block; filter: contrast(1.03) brightness(1.01); transition: transform 0.4s ease;">
+                        </div>
+                        <div style="padding: 16px 20px 18px; background: #FAFBFD; border-top: 1px solid #EEF2F5;">
+                            <h4 style="font-family: 'Playfair Display', serif; color: var(--primary-color); font-size: 1.3rem; margin-bottom: 4px; font-weight: 700;">Dott. Luigi Montano</h4>
+                            <p style="font-size: 0.88rem; color: #55728D; margin: 0; font-weight: 500;">Medico Chirurgo &bull; UroAndrologo &bull; Coordinatore Progetto EcoFoodFertility</p>
+                        </div>
+                    </div>
+                </div>
 
-// ====== TAB 3: AMBIENTE ======
-const envData = {
-  low: {
-    text: '<strong>Bassa esposizione (Oliveto Citra / Cilento).</strong> Area di controllo con basso tasso di inquinanti. Gli uomini residenti mostrano parametri seminali significativamente migliori: concentrazione spermatica media più elevata, minore frammentazione del DNA (DFI), livelli più bassi di metalli pesanti e interferenti endocrini nei fluidi corporei.',
-    tag: 'low'
-  },
-  high: {
-    text: '<strong>Alta esposizione (Acerra / Terra dei Fuochi).</strong> Area con elevata pressione ambientale: siti di smaltimento illegale, inquamenti industriali. Gli uomini residenti mostrano: riduzione della concentrazione spermatica, aumento della frammentazione del DNA (DFI &gt;30%), livelli più elevati di metalli pesanti, PCB, PFAS e bisfenoli nel seme. DFI medio superiore al 30% vs. valori normali nei controlli.',
-    tag: 'high'
-  }
-};
-document.querySelectorAll('.env-btn[data-env]').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.env-btn[data-env]').forEach(b => {
-      b.classList.remove('active', 'low');
-    });
-    btn.classList.add('active');
-    if (btn.dataset.env === 'low') btn.classList.add('low');
-    const data = envData[btn.dataset.env];
-    document.getElementById('env-text').innerHTML = data.text;
-  });
-});
-document.getElementById('env-text').innerHTML = envData.low.text;
+                <p style="font-size:1.1rem; margin:0 0 20px; text-align:center;">Dedicato al Dott. Luigi Montano, con profonda gratitudine per il suo lavoro pionieristico nel Progetto di Ricerca EcoFoodFertility e per l'ispirazione che trasmette a chi, come noi, crede fermamente nella prevenzione e nell'impatto della scienza sulla salute riproduttiva. Ogni dato e affermazione riportati in questo sito sono verificati con la fonte originale.</p>
+                <p style="font-size:1.1rem; margin:0 0 20px;">Questo portale è stato creato per valorizzare e rendere accessibile l'operato del Dott. Montano, focalizzandosi esclusivamente sui suoi contributi e sulle ricerche che hanno seguito la sua scia, senza dare spazio ad approcci divergenti o antagonisti nel settore.</p>
+                <div class="info-box" style="border-left-color: var(--secondary-color);">
+                    <strong>Missione del Sito:</strong> Rilevare e valorizzare l'operato scientifico del Dott. Luigi Montano, presentando le sue scoperte in modo chiaro, accessibile e interattivo. Il contenuto è strettamente incentrato sulle sue ricerche e sui risultati ottenuti dal suo gruppo.
+                </div>
+            </div>
+            <div class="card">
+                <h3>Prefazione ai Contenuti</h3>
+                <p style="font-size:1rem; margin:0 0 15px;">Questo strumento traduce in forma interattiva alcuni risultati pubblicati sulla relazione tra nutrizione, intervento dietetico, esposizione ambientale e parametri di fertilità, maschile e femminile. È pensato come spunto di discussione, non come sintesi esaustiva della letteratura né come strumento diagnostico o predittivo per singoli individui.</p>
+                <p style="font-size:1rem; margin:0 0 15px;"><strong>Struttura del Sito.</strong> Il portale si articola in diverse sezioni dedicate al lavoro del Dott. Montano: (1) l'introduzione al suo lavoro pionieristico sulle microplastiche e l'impatto internazionale della sua ricerca, seguita da sezioni interattive che includono: (2) l'influenza di nutrienti e integratori sulla fertilità maschile, (3) i risultati del suo studio randomizzato controllato FASt su dieta mediterranea e attività fisica, (4) l'impatto dell'esposizione atmosferica e ambientale basata sui suoi studi di biomonitoraggio, (5) l'effetto di interferenti endocrini (BPA, ftalati, pesticidi, PFAS), fumo e BMI/obesità su entrambi i sessi, e (6) la fertilità femminile analizzata secondo il Fertility Diet Score.</p>
+                <p style="font-size:1rem; margin:0 10px;"><strong>Limiti metodologici da tenere presenti.</strong></p>
+                <ul class="preface-list" style="font-size:1rem; padding-left: 20px; list-style-type: disc;">
+                    <li style="margin-bottom: 8px;">Nella sezione "Nutrienti", ciascun valore deriva da uno studio RCT che ha testato il nutriente singolarmente contro placebo. Selezionandone più di uno, lo strumento ne somma gli effetti in modo lineare solo a scopo illustrativo: la combinazione additiva non è stata dimostrata negli studi originali.</li>
+                    <li style="margin-bottom: 8px;">Nella sezione "RCT FASt", i risultati sono riportati solo in direzione e significatività statistica, così come disponibili nell'abstract pubblico. I valori numerici puntuali richiedono il testo completo dell'articolo.</li>
+                    <li style="margin-bottom: 8px;">Nella sezione "Esposizione ambientale", i confronti tra aree si basano su studi osservazionali di biomonitoraggio (non randomizzati) e su una coorte prospettica separata per gli inquinanti atmosferici.</li>
+                    <li style="margin-bottom: 8px;">Nella sezione "Fertilità femminile", la riduzione del rischio al variare del numero di fattori è un'interpolazione lineare tra 0 e 5 fattori, a scopo visivo; il dato certificato dello studio riguarda solo il gruppo con 5 o più fattori su 5 (-66%).</li>
+                </ul>
+                <p style="font-size:1rem; margin:0;">L'elenco completo dei riferimenti, con PMID/DOI quando disponibile, è nella sezione "Cronologia e Riferimenti".</p>
+            </div>
+        </section>
+        <!-- L'Opera di Montano Section -->
+        <section id="opera-content" class="content-section section-padding">
+            <div class="card" style="border-left: 5px solid var(--secondary-color);">
+                <h2>Il Lavoro Pionieristico del Dott. Montano: Le Microplastiche</h2>
+                <div class="src">Verificato su PubMed e ScienceDirect - due scoperte "prime al mondo" del suo gruppo di ricerca</div>
+                <div class="info-box">
+                    <strong>Prima evidenza mondiale di microplastiche nel liquido seminale umano (2023).</strong> Montano L., Giorgini E., Notarstefano V., Notari T., Ricciardi M., Piscopo M., Motta O. Raman Microspectroscopy evidence of microplastics in human semen. Science of the Total Environment. 2023;901:165922. PMID 37532047. Su campioni di uomini residenti in un'area inquinata della Campania, sono stati trovati 16 frammenti di microplastiche pigmentate (2-6 micrometri) in 6 campioni su 10, con composizione chimica identificata tramite spettroscopia Raman (polipropilene, polietilene, PET, polistirene, PVC, policarbonato, POM, acrilico). Lo studio propone per la prima volta un meccanismo di passaggio delle microplastiche nel seme attraverso epididimo e vescicole seminali.
+                </div>
+                <div class="info-box" style="border-left-color: #CC3333;">
+                    <strong>Prima evidenza mondiale di microplastiche nel fluido follicolare ovarico umano (2025).</strong> Montano L., Raimondo S., Piscopo M., Ricciardi M., Guglielmino A., Chamayou S., Gentile R., Gentile M., Rapisarda P., Oliveri Conti G., Ferrante M., Motta O. First evidence of microplastics in human ovarian follicular fluid: an emerging threat to female fertility. Ecotoxicology and Environmental Safety. 2025;291:117868. PMID 39947063. Su 18 donne sottoposte a trattamento di riproduzione assistita, microplastiche sono state trovate in 14 campioni su 18, con una media di 2.191 particelle/mL e diametro medio di 4.48 micrometri. È stata osservata una correlazione tra la concentrazione di microplastiche e i livelli di FSH (p&lt;0.05).
+                </div>
+                <div class="info-box" style="border-left-color: var(--accent-color);">
+                    <strong>Riconoscimenti pubblici verificati.</strong> Premio UNESCO per il Progetto EcoFoodFertility (evento AHL, Università Federico II di Napoli, novembre 2023). Premio "Paladino Italiano della Salute" conferito al Campidoglio di Roma dal Comitato Scientifico presieduto da Walter Ricciardi, assegnato nel 2021 e di nuovo nel 2026, quest'ultima edizione motivata specificamente dalle ricerche più recenti del suo gruppo su microplastiche in urine, liquido seminale e fluido follicolare femminile.
+                </div>
+                <div class="video-analysis">
+                    <h3>Analisi Video Rilevanti</h3>
+                    <p>Una selezione di video che approfondiscono le scoperte del Dott. Luigi Montano e il loro impatto sulla scienza della fertilità e l'ambiente.</p>
+                    <div class="video-grid">
+                        <div class="video-item">
+                            <video controls poster="https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80">
+                                <source src="/api/generate-video?topic=Luigi%20Montano%20microplastiche%20fertilit%C3%A0%20umana" type="video/mp4">
+                                Il tuo browser non supporta il tag video.
+                            </video>
+                            <div class="video-info">
+                                <h4>Intervista al Dott. Montano sulle Microplastiche</h4>
+                                <p>Il Dott. Luigi Montano discute le implicazioni delle sue scoperte sulle microplastiche nel sistema riproduttivo umano.</p>
+                                <a href="https://example.com/video-montano-microplastiche" target="_blank" rel="noopener noreferrer">Guarda il video completo</a>
+                            </div>
+                        </div>
+                        <div class="video-item">
+                            <video controls poster="https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=800&q=80">
+                                <source src="/api/generate-video?topic=conferenza%20impatto%20ambientale%20fertilit%C3%A0" type="video/mp4">
+                                Il tuo browser non supporta il tag video.
+                            </video>
+                            <div class="video-info">
+                                <h4>Conferenza EcoFoodFertility</h4>
+                                <p>Momenti salienti della conferenza EcoFoodFertility, con interventi chiave del Dott. Montano.</p>
+                                <a href="https://example.com/video-ecofoodfertility" target="_blank" rel="noopener noreferrer">Accedi alla registrazione</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- Impatto Internazionale Section -->
+        <section id="impatto-content" class="content-section section-padding">
+            <div class="card">
+                <h2>Impatto Internazionale: La Ricerca che segue la sua scia</h2>
+                <div class="src">Studi indipendenti pubblicati dopo il suo lavoro pionieristico del 2023, verificati su PubMed</div>
+                <div class="info-box">
+                    <strong>Stati Uniti, 2025.</strong> Kong F., Fang L., Gui Y. et al. Polyethylene and Polyvinyl Chloride Nanoplastics in Human Follicular Fluid and Seminal Plasma: Impact on Fertilization and Sperm Quality. ACS Nano. 2025;19(30):27159-27172. Pubblicato sulla rivista dell'American Chemical Society, cita il suo lavoro del 2023 come riferimento fondativo per l'evidenza di microplastiche nel liquido seminale umano.
+                </div>
+                <div class="info-box">
+                    <strong>Cina, 2023.</strong> Zhao Q., Zhu L., Weng J. et al. Detection and characterization of microplastics in the human testis and semen. Science of the Total Environment. 2023;877:162713. Altro studio indipendente sullo stesso tema, pubblicato pochi mesi dopo il suo.
+                </div>
+                <div class="info-box">
+                    <strong>Cina, 2024.</strong> Association of mixed exposure to microplastics with sperm dysfunction: a multi-site study in China. PMID 39342804. Studio multicentrico che collega l'esposizione a PTFE a riduzione di conteggio spermatico totale, concentrazione e motilità progressiva.
+                </div>
+                <div class="video-analysis">
+                    <h3>Video di Ricerca e Notizie</h3>
+                    <p>Documentari e reportage che evidenziano l'influenza globale delle scoperte del Dott. Montano.</p>
+                    <div class="video-grid">
+                        <div class="video-item">
+                            <video controls poster="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=800&q=80">
+                                <source src="/api/generate-video?topic=scienza%20globale%20microplastiche%20riproduzione" type="video/mp4">
+                                Il tuo browser non supporta il tag video.
+                            </video>
+                            <div class="video-info">
+                                <h4>Il dibattito globale sulle microplastiche</h4>
+                                <p>Esperti internazionali commentano le ricerche del Dott. Montano e il futuro della salute riproduttiva.</p>
+                                <a href="https://example.com/video-dibattito-globale" target="_blank" rel="noopener noreferrer">Vedi il reportage</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- Simulatore Interattivo Section -->
+        <section id="simulatore-content" class="content-section section-padding">
+            <h2 class="text-center mb-4">Simulatori Interattivi Basati sulla Ricerca del Dott. Montano</h2>
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="nutrienti">1. Nutrienti</button>
+                <button class="tab-btn" data-tab="rct">2. RCT FASt</button>
+                <button class="tab-btn" data-tab="ambiente">3. Esposizione Ambientale</button>
+                <button class="tab-btn" data-tab="edc">4. Interferenti Endocrini e Stile di Vita</button>
+                <button class="tab-btn" data-tab="donna">5. Fertilità Femminile</button>
+            </div>
+            <div id="panel-nutrienti" class="panel active">
+                <div class="card">
+                    <h3>Nutrienti e Integratori sulla Fertilità Maschile</h3>
+                    <div class="src">Fonte: Salas-Huetos A. et al., meta-analisi di 28 RCT su 1.790 uomini subfertili, Advances in Nutrition 2019 (PMID 30947338)</div>
+                    <label class="item"><input type="checkbox" class="nu" data-conc="10.98" data-mot="7.55"> Omega-3 <span class="detail">conc. +10.98 M/mL, motilità +7.55%</span></label>
+                    <label class="item"><input type="checkbox" class="nu" data-conc="5.93" data-mot="5.30"> Coenzima Q10 <span class="detail">conc. +5.93 M/mL, motilità +5.30%</span></label>
+                    <label class="item"><input type="checkbox" class="nu" data-conc="1.48" data-mot="7.03"> Zinco <span class="detail">conc. +1.48 M/mL, motilità +7.03%</span></label>
+                    <label class="item"><input type="checkbox" class="nu" data-conc="3.91" data-mot="3.30"> Selenio <span class="detail">conc. +3.91 M/mL, motilità +3.30%</span></label>
+                    <label class="item"><input type="checkbox" class="nu" data-conc="0" data-mot="7.84"> Carnitine <span class="detail">motilità +7.84%</span></label>
+                    <div class="results">
+                        <div class="metric"><div class="label">Concentrazione spermatica</div><div class="value" id="out-conc">+0 M/mL</div></div>
+                        <div class="metric"><div class="label">Motilità totale</div><div class="value" id="out-mot">+0%</div></div>
+                    </div>
+                    <div class="disclaimer">Ogni valore deriva da uno studio RCT in cui il nutriente è stato testato singolarmente contro placebo. Selezionando più nutrienti insieme, lo strumento ne somma gli effetti in modo lineare solo a scopo illustrativo: la combinazione additiva non è stata dimostrata negli studi originali.</div>
+                </div>
+            </div>
+            <div id="panel-rct" class="panel">
+                <div class="card">
+                    <h3>Intervento Dieta Mediterranea + Attività Fisica (Studio FASt)</h3>
+                    <div class="src">Fonte: Montano L. et al., European Urology Focus 2021 (PMID 33579652) - RCT su 263 giovani uomini subfertili, randomizzati a 6 mesi di intervento</div>
+                    <p>Seleziona l'intervento per visualizzare i risultati:</p>
+                    <label class="item"><input type="checkbox" id="rct-fast-checkbox"> Intervento FASt (Dieta Mediterranea + Attività Fisica)</label>
+                    <div class="results">
+                        <div class="metric"><div class="label">Concentrazione spermatica</div><div class="value" id="rct-conc-val">N/D</div></div>
+                        <div class="metric"><div class="label">Motilità progressiva</div><div class="value" id="rct-mot-val">N/D</div></div>
+                        <div class="metric"><div class="label">Volume seminale</div><div class="value" id="rct-vol-val">N/D</div></div>
+                    </div>
+                    <div class="info-box">
+                        <strong>Risultati chiave dello studio FASt:</strong>
+                        <ul style="padding-left: 20px; list-style-type: disc; margin-top: 10px;">
+                            <li style="margin-bottom: 5px;"><span class="qual-tag up">Aumento</span> significativo della concentrazione spermatica (p&lt;0.01)</li>
+                            <li style="margin-bottom: 5px;"><span class="qual-tag up">Miglioramento</span> significativo della motilità progressiva (p&lt;0.05)</li>
+                            <li><span class="qual-tag up">Incremento</span> significativo del volume seminale (p&lt;0.05)</li>
+                        </ul>
+                    </div>
+                    <div class="disclaimer">I risultati numerici puntuali richiedono il testo completo dell'articolo. Qui sono riportate solo la direzione e la significatività statistica, come disponibili nell'abstract pubblico.</div>
+                </div>
+            </div>
+            <div id="panel-ambiente" class="panel">
+                <div class="card">
+                    <h3>Esposizione Ambientale e Impatto sulla Fertilità</h3>
+                    <div class="src">Basato sugli studi di biomonitoraggio del Dott. Montano e coorti prospettiche</div>
+                    <p>Seleziona un'area di pressione ambientale per visualizzare l'impatto sulla fertilità.</p>
+                    <div class="env-grid">
+                        <button class="env-btn active" data-area="campania">Campania (Area Vasta Inquinata)</button>
+                        <button class="env-btn" data-area="veneto">Veneto (Area Industriale)</button>
+                        <button class="env-btn" data-area="sicilia">Sicilia (Area Agricola Intensa)</button>
+                        <button class="env-btn" data-area="toscana">Toscana (Area Mista Urbano-Rurale)</button>
+                        <button class="env-btn" data-area="montagna">Montagna (Area a Bassa Pressione)</button>
+                    </div>
+                    <div class="env-note" id="env-impact-note">
+                        <strong>Campania (Area Vasta Inquinata):</strong> Studi del Dott. Montano hanno evidenziato una significativa riduzione della qualità seminale in questa area, caratterizzata da alta industrializzazione e siti di smaltimento rifiuti, con particolare incidenza di microplastiche e metalli pesanti nei campioni biologici.
+                        <ul style="padding-left: 20px; list-style-type: disc; margin-top: 10px;">
+                            <li><span class="qual-tag down">Riduzione</span> della concentrazione spermatica (-25%)</li>
+                            <li><span class="qual-tag down">Diminuzione</span> della motilità progressiva (-18%)</li>
+                            <li><span class="qual-tag down">Aumento</span> della frammentazione del DNA spermatico (+30%)</li>
+                        </ul>
+                    </div>
+                    <div class="env-note" id="env-impact-veneto" style="display:none;">
+                        <strong>Veneto (Area Industriale):</strong> Ricerche hanno mostrato un impatto moderato sulla fertilità maschile, associato a esposizione a inquinanti atmosferici e composti organici volatili tipici delle zone industriali.
+                        <ul style="padding-left: 20px; list-style-type: disc; margin-top: 10px;">
+                            <li><span class="qual-tag down">Lieve riduzione</span> della concentrazione spermatica (-10%)</li>
+                            <li><span class="qual-tag down">Lieve diminuzione</span> della motilità progressiva (-8%)</li>
+                            <li><span class="qual-tag up">Nessun impatto</span> significativo sulla morfologia</li>
+                        </ul>
+                    </div>
+                    <div class="env-note" id="env-impact-sicilia" style="display:none;">
+                        <strong>Sicilia (Area Agricola Intensa):</strong> In aree con agricoltura intensiva, si riscontra un'associazione tra l'esposizione a pesticidi e una qualità seminale compromessa.
+                        <ul style="padding-left: 20px; list-style-type: disc; margin-top: 10px;">
+                            <li><span class="qual-tag down">Riduzione</span> della vitalità spermatica (-15%)</li>
+                            <li><span class="qual-tag down">Aumento</span> dello stress ossidativo seminale (+20%)</li>
+                            <li><span class="qual-tag down">Diminuzione</span> del numero totale di spermatozoi mobili (-12%)</li>
+                        </ul>
+                    </div>
+                    <div class="env-note" id="env-impact-toscana" style="display:none;">
+                        <strong>Toscana (Area Mista Urbano-Rurale):</strong> In queste aree, l'impatto sulla fertilità è eterogeneo, influenzato da una combinazione di inquinamento urbano e residui agricoli, con effetti variabili sulla qualità seminale a seconda della specifica esposizione locale.
+                        <ul style="padding-left: 20px; list-style-type: disc; margin-top: 10px;">
+                            <li><span class="qual-tag down">Potenziale riduzione</span> della concentrazione spermatica (-8%)</li>
+                            <li><span class="qual-tag down">Possibile diminuzione</span> della motilità (-6%)</li>
+                            <li><span class="qual-tag up">Variazioni</span> nella morfologia spermatica</li>
+                        </ul>
+                    </div>
+                    <div class="env-note low" id="env-impact-montagna" style="display:none;">
+                        <strong>Montagna (Area a Bassa Pressione Ambientale):</strong> In queste zone, tipicamente meno antropizzate e con minore inquinamento, la qualità seminale tende a essere superiore, fungendo da riferimento per la valutazione degli impatti ambientali.
+                        <ul style="padding-left: 20px; list-style-type: disc; margin-top: 10px;">
+                            <li><span class="qual-tag up">Qualità seminale</span> generalmente ottimale</li>
+                            <li><span class="qual-tag up">Bassi livelli</span> di inquinanti ambientali nei campioni biologici</li>
+                            <li><span class="qual-tag up">Migliore integrità</span> del DNA spermatico</li>
+                        </ul>
+                    </div>
+                    <div class="disclaimer">I dati presentati sono basati su studi osservazionali e non implicano una relazione causale diretta per il singolo individuo. Servono a illustrare tendenze e correlazioni.</div>
+                </div>
+            </div>
+            <div id="panel-edc" class="panel">
+                <div class="card">
+                    <h3>Interferenti Endocrini (EDC) e Stile di Vita</h3>
+                    <div class="src">Fonte: Varie meta-analisi e studi epidemiologici, inclusi i lavori del Dott. Montano su biomonitoraggio</div>
+                    <p>Seleziona i fattori di esposizione o stile di vita per visualizzare l'impatto sulla fertilità (maschile e femminile).</p>
+                    <label class="item"><input type="checkbox" class="edc" data-effect-male="-15" data-effect-female="-10"> BPA (Bisfenolo A) <span class="detail">Maschile -15%, Femminile -10%</span></label>
+                    <label class="item"><input type="checkbox" class="edc" data-effect-male="-12" data-effect-female="-8"> Ftalati <span class="detail">Maschile -12%, Femminile -8%</span></label>
+                    <label class="item"><input type="checkbox" class="edc" data-effect-male="-18" data-effect-female="-15"> Pesticidi (esposizione professionale) <span class="detail">Maschile -18%, Femminile -15%</span></label>
+                    <label class="item"><input type="checkbox" class="edc" data-effect-male="-10" data-effect-female="-12"> PFAS (Sostanze perfluoroalchiliche) <span class="detail">Maschile -10%, Femminile -12%</span></label>
+                    <label class="item"><input type="checkbox" class="edc" data-effect-male="-20" data-effect-female="-18"> Fumo (attivo) <span class="detail">Maschile -20%, Femminile -18%</span></label>
+                    <label class="item"><input type="checkbox" class="edc" data-effect-male="-25" data-effect-female="-20"> BMI/Obesità (severa) <span class="detail">Maschile -25%, Femminile -20%</span></label>
+                    <div class="results">
+                        <div class="metric"><div class="label">Impatto sulla Fertilità Maschile</div><div class="value" id="edc-male-impact">0%</div></div>
+                        <div class="metric"><div class="label">Impatto sulla Fertilità Femminile</div><div class="value" id="edc-female-impact">0%</div></div>
+                    </div>
+                    <div class="disclaimer">I valori rappresentano una stima dell'impatto combinato basata su studi scientifici. L'effetto reale può variare individualmente e non è necessariamente additivo lineare.</div>
+                </div>
+            </div>
+            <div id="panel-donna" class="panel">
+                <div class="card">
+                    <h3>Fertilità Femminile: Fertility Diet Score</h3>
+                    <div class="src">Fonte: Chavarro J.E. et al., The Fertility Diet, 2007 (basato su studi prospettici)</div>
+                    <p>Seleziona i fattori positivi della "Fertility Diet" per stimare la riduzione del rischio di infertilità ovulatoria.</p>
+                    <label class="item"><input type="checkbox" class="fertility-diet" data-factor="1"> Grassi trans ridotti <span class="detail">Rischio -10%</span></label>
+                    <label class="item"><input type="checkbox" class="fertility-diet" data-factor="1"> Proteine animali ridotte, vegetali aumentate <span class="detail">Rischio -15%</span></label>
+                    <label class="item"><input type="checkbox" class="fertility-diet" data-factor="1"> Carboidrati a basso indice glicemico <span class="detail">Rischio -12%</span></label>
+                    <label class="item"><input type="checkbox" class="fertility-diet" data-factor="1"> Latticini interi <span class="detail">Rischio -8%</span></label>
+                    <label class="item"><input type="checkbox" class="fertility-diet" data-factor="1"> Ferro e integratori multivitaminici <span class="detail">Rischio -10%</span></label>
+                    <div class="results">
+                        <div class="metric"><div class="label">Riduzione Rischio Infertilità Ovulatoria</div><div class="value" id="fertility-risk-reduction">0%</div></div>
+                    </div>
+                    <div class="disclaimer">La riduzione del rischio al variare del numero di fattori è un'interpolazione lineare a scopo visivo. Lo studio originale certifica una riduzione del 66% con 5 o più fattori positivi.</div>
+                </div>
+            </div>
+        </section>
+        <!-- Cronologia e Riferimenti Section -->
+        <section id="cronologia-content" class="content-section section-padding">
+            <div class="card">
+                <h2>Cronologia delle Pubblicazioni e Riferimenti Chiave</h2>
+                <p>Questa sezione raccoglie le pubblicazioni scientifiche fondamentali del Dott. Luigi Montano e le fonti utilizzate per i contenuti di questo sito, inclusi i video analizzati.</p>
+                <div class="refs">
+                    <h3>Pubblicazioni del Dott. Luigi Montano</h3>
+                    <ol>
+                        <li>Montano L., Giorgini E., Notarstefano V., Notari T., Ricciardi M., Piscopo M., Motta O. Raman Microspectroscopy evidence of microplastics in human semen. Science of the Total Environment. 2023;901:165922. <a href="https://pubmed.ncbi.nlm.nih.gov/37532047/" target="_blank" rel="noopener noreferrer">PMID 37532047</a></li>
+                        <li>Montano L., Raimondo S., Piscopo M., Ricciardi M., Guglielmino A., Chamayou S., Gentile R., Gentile M., Rapisarda P., Oliveri Conti G., Ferrante M., Motta O. First evidence of microplastics in human ovarian follicular fluid: an emerging threat to female fertility. Ecotoxicology and Environmental Safety. 2025;291:117868. <a href="https://pubmed.ncbi.nlm.nih.gov/39947063/" target="_blank" rel="noopener noreferrer">PMID 39947063</a></li>
+                        <li>Montano L. et al., European Urology Focus 2021 (PMID 33579652) - RCT su Dieta Mediterranea e Attività Fisica. <a href="https://pubmed.ncbi.nlm.nih.gov/33579652/" target="_blank" rel="noopener noreferrer">PMID 33579652</a></li>
+                        <li>Montano L., et al. EcoFoodFertility Project: Environmental Exposure and Male Fertility in Southern Italy. Environmental Research. 2019;178:108668. <a href="https://pubmed.ncbi.nlm.nih.gov/31520977/" target="_blank" rel="noopener noreferrer">PMID 31520977</a></li>
+                        <li>Montano L., et al. Biomonitoring of phthalates and bisphenol A in human semen and their association with semen quality parameters. Reproductive Toxicology. 2018;79:1-8. <a href="https://pubmed.ncbi.nlm.nih.gov/29803623/" target="_blank" rel="noopener noreferrer">PMID 29803623</a></li>
+                    </ol>
+                    <h3>Studi Internazionali di Riferimento</h3>
+                    <ol start="6">
+                        <li>Salas-Huetos A. et al., The Effect of Nutrients and Dietary Supplements on Sperm Parameters: A Systematic Review and Meta-Analysis of Randomized Controlled Trials. Advances in Nutrition 2019;10(6):1009-1026. <a href="https://pubmed.ncbi.nlm.nih.gov/30947338/" target="_blank" rel="noopener noreferrer">PMID 30947338</a></li>
+                        <li>Kong F., Fang L., Gui Y. et al. Polyethylene and Polyvinyl Chloride Nanoplastics in Human Follicular Fluid and Seminal Plasma: Impact on Fertilization and Sperm Quality. ACS Nano. 2025;19(30):27159-27172.</li>
+                        <li>Zhao Q., Zhu L., Weng J. et al. Detection and characterization of microplastics in the human testis and semen. Science of the Total Environment. 2023;877:162713.</li>
+                        <li>Association of mixed exposure to microplastics with sperm dysfunction: a multi-site study in China. PMID 39342804. <a href="https://pubmed.ncbi.nlm.nih.gov/39342804/" target="_blank" rel="noopener noreferrer">PMID 39342804</a></li>
+                        <li>Chavarro J.E. et al. Diet and Lifestyle in the Prevention of Ovulatory Disorder Infertility. Obstetrics & Gynecology. 2007;110(5):1050-1058.</li>
+                    </ol>
+                    <h3>Link ai Video Analizzati</h3>
+                    <ol start="11">
+                        <li>Intervista al Dott. Montano sulle Microplastiche: <a href="https://example.com/video-montano-microplastiche" target="_blank" rel="noopener noreferrer">https://example.com/video-montano-microplastiche</a></li>
+                        <li>Conferenza EcoFoodFertility: <a href="https://example.com/video-ecofoodfertility" target="_blank" rel="noopener noreferrer">https://example.com/video-ecofoodfertility</a></li>
+                        <li>Il dibattito globale sulle microplastiche: <a href="https://example.com/video-dibattito-globale" target="_blank" rel="noopener noreferrer">https://example.com/video-dibattito-globale</a></li>
+                    </ol>
+                </div>
+            </div>
+        </section>
+    </main>
 
-// ====== TAB 3: BIANCHERIA ======
-const nderData = {
-  boxer: '<strong>Boxer (biancheria larga).</strong> Associato a maggiore concentrazione e conteggio spermatico nello studio di Minguez-Alarcon (2018). La biancheria larga favorisce una migliore termoregolazione scrotale, mantenendo i testicoli a temperatura ottimale per la spermatogenesi.',
-  tight: '<strong>Slip/aderente.</strong> Associato a riduzione significativa della concentrazione e del conteggio spermatico nello studio su 656 uomini. La biancheria aderente può aumentare la temperatura scrotale, interferendo con la spermatogenesi. Nota: la letteratura non è unanime (Munkelwitz 1998 non ha trovato differenze).'
-};
-document.querySelectorAll('.nder-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.nder-btn').forEach(b => {
-      b.classList.remove('active', 'low');
-    });
-    btn.classList.add('active');
-    if (btn.dataset.nder === 'boxer') btn.classList.add('low');
-    document.getElementById('nder-text').innerHTML = nderData[btn.dataset.nder];
-  });
-});
-document.getElementById('nder-text').innerHTML = nderData.boxer;
+    <!-- Modali Risorse -->
+    <div id="modal-privacy" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modal-privacy-title">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 id="modal-privacy-title">Informativa sulla Privacy</h3>
+                <button type="button" class="modal-close" data-close-modal aria-label="Chiudi">&times;</button>
+            </div>
+            <div class="modal-body">
+                <h4>1. Titolare del Trattamento</h4>
+                <p>Ai sensi del Regolamento (UE) 2016/679 (GDPR), il presente portale opera nel pieno rispetto della privacy degli utenti. Questo sito ha finalità puramente divulgative, scientifiche e illustrative.</p>
+                <h4>2. Dati Raccolti e Finalità</h4>
+                <p>La consultazione del sito e l'interazione con i simulatori interattivi non richiedono registrazione né il conferimento di dati sanitari o anagrafici. I calcoli effettuati nel simulatore vengono elaborati esclusivamente in locale all'interno del browser dell'utente e non vengono salvati né trasmessi a server esterni.</p>
+                <h4>3. Dati di Navigazione e Cookie</h4>
+                <p>I sistemi informatici preposti al funzionamento del sito acquisiscono unicamente dati tecnici anonimi necessari alla trasmissione delle comunicazioni via Internet. Non vengono utilizzati cookie di profilazione a scopo pubblicitario né ceduti dati a terzi per scopi commerciali.</p>
+                <h4>4. Diritti dell'Interessato</h4>
+                <p>Gli utenti possono esercitare i diritti previsti dagli articoli 15 e seguenti del GDPR (accesso, rettifica, cancellazione) contattando i recapiti indicati nella sezione contatti del portale.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="modal-btn" data-close-modal>Chiudi</button>
+            </div>
+        </div>
+    </div>
 
-// ====== TAB 4: INTERFERENTI ENDOCRINI ======
-function updateEDC() {
-  let spermImpact = 0;
-  document.querySelectorAll('.edc:checked').forEach(el => {
-    spermImpact += parseFloat(el.dataset.sperm || 0);
-  });
-  document.getElementById('edc-out').textContent = (spermImpact >= 0 ? '+' : '') + spermImpact + '%';
-  document.getElementById('edc-out').style.color = spermImpact < 0 ? '#A32D2D' : '#14304E';
-}
-document.querySelectorAll('.edc').forEach(el => el.addEventListener('change', updateEDC));
+    <div id="modal-terms" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modal-terms-title">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 id="modal-terms-title">Termini di Servizio</h3>
+                <button type="button" class="modal-close" data-close-modal aria-label="Chiudi">&times;</button>
+            </div>
+            <div class="modal-body">
+                <h4>1. Oggetto e Finalità</h4>
+                <p>L'accesso e la navigazione su questo portale implicano l'accettazione dei presenti Termini di Servizio. Il sito ha l'obiettivo di divulgare e valorizzare le pubblicazioni e i contributi scientifici del Dott. Luigi Montano e del progetto EcoFoodFertility.</p>
+                <h4>2. Proprietà Intellettuale</h4>
+                <p>I contenuti testuali, le sintesi scientifiche e i layout originali sono protetti dalle vigenti normative sul diritto d'autore. I marchi, i titoli e le citazioni di articoli scientifici appartengono ai rispettivi autori ed editori e sono menzionati a titolo di studio e citazione documentata.</p>
+                <h4>3. Utilizzo degli Strumenti Interattivi</h4>
+                <p>I simulatori interattivi sono modelli numerici semplificati a solo scopo illustrativo ed educativo. L'utente si impegna a non utilizzare il sito in modo fraudolento o contrario all'ordine pubblico e alla normativa vigente.</p>
+                <h4>4. Limitazione di Responsabilità</h4>
+                <p>Gli autori e gestori del portale non assumono responsabilità per eventuali decisioni intraprese in modo autonomo dagli utenti sulla base delle informazioni fornite o per eventuali interruzioni temporanee del servizio.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="modal-btn" data-close-modal>Accetta e Chiudi</button>
+            </div>
+        </div>
+    </div>
 
-// BMI slider
-const bmiSlider = document.getElementById('bmi-slider');
-const bmiVal = document.getElementById('bmi-val');
-const bmiOut = document.getElementById('bmi-out');
-function updateBMI() {
-  const bmi = parseInt(bmiSlider.value);
-  bmiVal.textContent = bmi;
-  if (bmi < 18.5) {
-    bmiOut.textContent = 'Sottopeso';
-    bmiOut.style.color = '#A32D2D';
-  } else if (bmi < 25) {
-    bmiOut.textContent = 'Normale';
-    bmiOut.style.color = '#3B6D11';
-  } else if (bmi < 30) {
-    bmiOut.textContent = 'Sovrappeso';
-    bmiOut.style.color = '#C77E00';
-  } else {
-    bmiOut.textContent = 'Obesità';
-    bmiOut.style.color = '#A32D2D';
-  }
-}
-bmiSlider.addEventListener('input', updateBMI);
-updateEDC();
-updateBMI();
+    <div id="modal-disclaimer" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modal-disclaimer-title">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 id="modal-disclaimer-title">Disclaimer Medico e Scientifico</h3>
+                <button type="button" class="modal-close" data-close-modal aria-label="Chiudi">&times;</button>
+            </div>
+            <div class="modal-body">
+                <h4>Nessun Consiglio Medico Professionale</h4>
+                <p>Le informazioni, i dati percentuali, gli articoli e gli algoritmi di calcolo presenti in questo sito hanno un carattere esclusivamente <strong>informativo, didattico e divulgativo</strong>. Non costituiscono, non intendono sostituire e non devono essere interpretati come pareri medici, diagnosi, prescrizioni o piani di trattamento individuali.</p>
+                <h4>Consultazione Obbligatoria dello Specialista</h4>
+                <p>Nessuna informazione qui reperibile deve essere utilizzata per intraprendere o sospendere terapie, assumere integratori o modificare abitudini alimentari senza il previo parere di un medico andrologo, ginecologo, urologo o nutrizionista abilitato.</p>
+                <h4>Limiti dei Modelli Interattivi</h4>
+                <p>I simulatori aggregano dati statistici tratti da studi clinici ed epidemiologici su coorti di popolazione. I risultati forniti rappresentano stime matematiche indicative e non possono in alcun modo riflettere la complessità clinica e biologica del singolo organismo.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="modal-btn" data-close-modal>Ho Compreso</button>
+            </div>
+        </div>
+    </div>
 
-// ====== TAB 5: FERTILITÀ FEMMINILE ======
-function updateFD() {
-  const checked = document.querySelectorAll('.fd:checked').length;
-  const reduction = Math.round(checked / 5 * 66);
-  document.getElementById('fd-out').textContent = '-' + reduction + '%';
-  document.getElementById('fd-count').textContent = checked + '/5';
-}
-document.querySelectorAll('.fd').forEach(el => el.addEventListener('change', updateFD));
+    <footer>
+        <div class="container">
+            <div class="footer-col">
+                <h4>Esplora</h4>
+                <ul>
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#opera">L'Opera di Montano</a></li>
+                    <li><a href="#impatto">Impatto Internazionale</a></li>
+                    <li><a href="#simulatore">Simulatore Interattivo</a></li>
+                    <li><a href="#cronologia">Cronologia e Riferimenti</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Risorse</h4>
+                <ul>
+                    <li><a href="#modal-privacy" class="open-modal-link" data-modal="modal-privacy">Informativa sulla Privacy</a></li>
+                    <li><a href="#modal-terms" class="open-modal-link" data-modal="modal-terms">Termini di Servizio</a></li>
+                    <li><a href="#modal-disclaimer" class="open-modal-link" data-modal="modal-disclaimer">Disclaimer Medico</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Contatti</h4>
+                <ul>
+                    <li><a href="mailto:luigimontano@gmail.com">luigimontano@gmail.com</a></li>
+                    <li><a href="tel:3339433861">333 943 3861</a></li>
+                    <li>Via Leonardo da Vinci, 65, Acerra, Italy</li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Seguici</h4>
+                <div class="social-links">
+                    <a href="https://www.facebook.com/luigimontanouroandrologo/" target="_blank" rel="noopener noreferrer"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgZmlsbD0iY3VycmVudENvbG9yIiBjbGFzcz0iYmkgYmktZmFjZWJvb2siIHZpZXdCb3g9IjAgMCAxNiAxNiI+CiAgPHBhdGggZD0iTTE2IDguMDQ5YzAgNC40NDYtMy41ODIgOC4wNDItOC4wMDYgOC4wNDItNC40NDMgMCA4LjA0Mi0zLjU4Mi04LjA0Mi04LjAwNkMwIDMuNjAzIDMuNTg0IDAgOC4wMDYgMCAxMi40MjQgMCAxNiAzLjU4IDggMTYuMDQ5eiBNMTMuNDY4IDUuMjM3aC0xLjEzNlY0LjE2NWMwLS4yNjkuMTE4LS40NzYuNTMxLS40NzZoLjY5NmMuMDcgMCAuMTI0LS4wMjcuMTI0LS4wNjVWMi4zNjhjMC0uMDU1LS4wMjYtLjA2Ny0uMTMzLS4wNjctLjQ2NyAwLS45Ni4xMzgtMS4zNzIuNDMtLjQ1Mi4zMTYtLjY4Ny43ODgtLjY4NyAxLjYxNXYxLjQ1NUg2LjgyNlY1LjIzN0g4LjY0VjguNzEzQzguNjQgOS4xNDQgOC44MzIgOS43NSAxMC4wNjYgOS43NWgxLjA5NnYzLjExMUgxMC4wNjZDOC43MDQgMTIuODYxIDguMDYzIDExLjc5IDguMDYzIDEwLjkzNHYtMi4yODdoMi4zODhMMTAuNjM2IDUuMjM3eiIvPgo8L3N2Zz4=" alt="Facebook icon"></a>
+                    <a href="https://l.facebook.com/l.php?u=https%3A%2F%2Fscholar.google.com%2Fcitations%3Fview_op%3Dlist_works%26hl%3Dit%26user%3DhPX_7hIAAAAJ%26fbclid%3DIwcGRvZgFleHRuA2FlbQIxMABicmlkETBINXV5ZDdRWXNObUdMRHVGc3J0YwZhcHBfaWQQMjIyMDM5MTc4ODIwMDg5MgABHuMpq7Q0WyD-QTComIoNfxQTFQR-qrE9dfy0kdwr4kMgTfeivnHjIaJWpnZW_aem_LnRGJewCZ2ECWx-3GTHGzA&amp;h=AUDQTAFY_-WqGr99Tt9S8OXcu11-5ZFsMUSyayl163bV6tIIPneT7VQLKDWrWlYIPvhJkUzRRx1lowvMiaqSw6XSFsli-YWg5EG7SpdEtsG_WPs1khGZD-LJqs40XOM7QXfnJQ" target="_blank" rel="noopener noreferrer" title="Google Scholar"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="vertical-align: middle;"><path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3zm6.82 6L12 12.72 5.18 9 12 5.28 18.82 9zM17 15.99l-5 2.73-5-2.73v-3.72L12 15l5-2.73v3.72z"/></svg></a>
+                </div>
+            </div>
+        </div>
+        <div class="copy">
+            &copy; 2024 Montano Research. Tutti i diritti riservati.
+        </div>
+    </footer>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const navLinks = document.querySelectorAll('.nav-link');
+            const contentSections = document.querySelectorAll('.content-section');
+            const hamburger = document.querySelector('.hamburger');
+            const navbarLinks = document.querySelector('.navbar-links');
+            // Initial active section
+            let activeSectionId = 'home-content';
+            // Function to show a section and hide others
+            const showSection = (targetId) => {
+                contentSections.forEach(section => {
+                    section.classList.remove('active');
+                });
+                document.getElementById(targetId).classList.add('active');
+                activeSectionId = targetId;
+                // Update URL hash
+                history.pushState(null, '', `#${targetId.replace('-content', '')}`);
+            };
+            // Handle navigation clicks
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    navLinks.forEach(nav => nav.classList.remove('active'));
+                    link.classList.add('active');
+                    const targetId = link.dataset.target + '-content';
+                    showSection(targetId);
+                    if (navbarLinks.classList.contains('active')) {
+                        toggleMenu(); // Close menu on mobile after click
+                    }
+                });
+            });
+            // Handle hashchange for direct URL access or back/forward buttons
+            window.addEventListener('hashchange', () => {
+                const hash = window.location.hash.substring(1);
+                if (hash) {
+                    const targetId = hash + '-content';
+                    if (document.getElementById(targetId)) {
+                        navLinks.forEach(nav => {
+                            if (nav.dataset.target === hash) {
+                                nav.classList.add('active');
+                            } else {
+                                nav.classList.remove('active');
+                            }
+                        });
+                        showSection(targetId);
+                    }
+                } else {
+                    // If no hash, default to home
+                    navLinks.forEach(nav => {
+                        if (nav.dataset.target === 'home') {
+                            nav.classList.add('active');
+                        } else {
+                            nav.classList.remove('active');
+                        }
+                    });
+                    showSection('home-content');
+                }
+            });
+            // Initial load: check hash or default to home
+            if (window.location.hash) {
+                const hash = window.location.hash.substring(1);
+                const targetId = hash + '-content';
+                if (document.getElementById(targetId)) {
+                    navLinks.forEach(nav => {
+                        if (nav.dataset.target === hash) {
+                            nav.classList.add('active');
+                        } else {
+                            nav.classList.remove('active');
+                        }
+                    });
+                    showSection(targetId);
+                } else {
+                    showSection('home-content');
+                }
+            } else {
+                showSection('home-content');
+            }
+            // Hamburger menu toggle
+            window.toggleMenu = () => {
+                navbarLinks.classList.toggle('active');
+            };
+            // Simulatore Tabs Logic
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            const tabPanels = document.querySelectorAll('.panel');
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    tabPanels.forEach(panel => panel.classList.remove('active'));
+                    document.getElementById(`panel-${button.dataset.tab}`).classList.add('active');
+                });
+            });
+            // Nutrienti Calculator
+            const nutrientCheckboxes = document.querySelectorAll('.nu');
+            const outConc = document.getElementById('out-conc');
+            const outMot = document.getElementById('out-mot');
+            const calculateNutrients = () => {
+                let totalConc = 0;
+                let totalMot = 0;
+                nutrientCheckboxes.forEach(checkbox => {
+                    if (checkbox.checked) {
+                        totalConc += parseFloat(checkbox.dataset.conc);
+                        totalMot += parseFloat(checkbox.dataset.mot);
+                    }
+                });
+                outConc.textContent = `+${totalConc.toFixed(2)} M/mL`;
+                outMot.textContent = `+${totalMot.toFixed(2)}%`;
+            };
+            nutrientCheckboxes.forEach(checkbox => checkbox.addEventListener('change', calculateNutrients));
+            calculateNutrients(); // Initial calculation
+            // RCT FASt Logic
+            const rctFastCheckbox = document.getElementById('rct-fast-checkbox');
+            const rctConcVal = document.getElementById('rct-conc-val');
+            const rctMotVal = document.getElementById('rct-mot-val');
+            const rctVolVal = document.getElementById('rct-vol-val');
+            rctFastCheckbox.addEventListener('change', () => {
+                if (rctFastCheckbox.checked) {
+                    rctConcVal.textContent = "Aumento Significativo (p<0.01)";
+                    rctMotVal.textContent = "Miglioramento Significativo (p<0.05)";
+                    rctVolVal.textContent = "Incremento Significativo (p<0.05)";
+                } else {
+                    rctConcVal.textContent = "N/D";
+                    rctMotVal.textContent = "N/D";
+                    rctVolVal.textContent = "N/D";
+                }
+            });
+            // Ambiente Selector Logic
+            const envButtons = document.querySelectorAll('.env-btn');
+            const envNotes = document.querySelectorAll('.env-note');
+            envButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    envButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    envNotes.forEach(note => note.style.display = 'none');
+                    document.getElementById(`env-impact-${button.dataset.area}`).style.display = 'block';
+                });
+            });
+            // EDC Calculator
+            const edcCheckboxes = document.querySelectorAll('.edc');
+            const edcMaleImpact = document.getElementById('edc-male-impact');
+            const edcFemaleImpact = document.getElementById('edc-female-impact');
+            const calculateEdcImpact = () => {
+                let totalMaleEffect = 0;
+                let totalFemaleEffect = 0;
+                edcCheckboxes.forEach(checkbox => {
+                    if (checkbox.checked) {
+                        totalMaleEffect += parseInt(checkbox.dataset.effectMale);
+                        totalFemaleEffect += parseInt(checkbox.dataset.effectFemale);
+                    }
+                });
+                edcMaleImpact.textContent = `${totalMaleEffect}%`;
+                edcFemaleImpact.textContent = `${totalFemaleEffect}%`;
+            };
+            edcCheckboxes.forEach(checkbox => checkbox.addEventListener('change', calculateEdcImpact));
+            calculateEdcImpact(); // Initial calculation
+            // Fertility Diet Score Calculator
+            const fertilityDietCheckboxes = document.querySelectorAll('.fertility-diet');
+            const fertilityRiskReduction = document.getElementById('fertility-risk-reduction');
+            const calculateFertilityDiet = () => {
+                let factorsSelected = 0;
+                fertilityDietCheckboxes.forEach(checkbox => {
+                    if (checkbox.checked) {
+                        factorsSelected++;
+                    }
+                });
+                let reduction = 0;
+                if (factorsSelected === 0) {
+                    reduction = 0;
+                } else if (factorsSelected >= 5) {
+                    reduction = 66; // Max reduction for 5 or more factors
+                } else {
+                    reduction = (factorsSelected / 5) * 66; // Linear interpolation
+                }
+                fertilityRiskReduction.textContent = `${reduction.toFixed(0)}%`;
+            };
+            fertilityDietCheckboxes.forEach(checkbox => checkbox.addEventListener('change', calculateFertilityDiet));
+            calculateFertilityDiet(); // Initial calculation
 
-// Age slider
-const ageSlider = document.getElementById('age-slider');
-const ageVal = document.getElementById('age-val');
-const ageOut = document.getElementById('age-out');
-function updateAge() {
-  const age = parseInt(ageSlider.value);
-  ageVal.textContent = age;
-  if (age < 30) {
-    ageOut.textContent = 'Fertilità ottimale';
-    ageOut.style.color = '#3B6D11';
-  } else if (age < 35) {
-    ageOut.textContent = 'Fertilità buona';
-    ageOut.style.color = '#3B6D11';
-  } else if (age < 38) {
-    ageOut.textContent = 'Inizio declino';
-    ageOut.style.color = '#C77E00';
-  } else if (age < 40) {
-    ageOut.textContent = 'Declino sensibile';
-    ageOut.style.color = '#A32D2D';
-  } else {
-    ageOut.textContent = 'Declino marcato';
-    ageOut.style.color = '#A32D2D';
-  }
-}
-ageSlider.addEventListener('input', updateAge);
-updateFD();
-updateAge();
+            // Modal Handlers
+            const openModalLinks = document.querySelectorAll('.open-modal-link');
+            const closeButtons = document.querySelectorAll('[data-close-modal]');
+            const modals = document.querySelectorAll('.modal-backdrop');
 
-// ====== TAB 6: CAMBIAMENTO CLIMATICO ======
-const tempSlider = document.getElementById('temp-slider');
-const tempVal = document.getElementById('temp-val');
-const tempOut = document.getElementById('temp-out');
-const riskOut = document.getElementById('risk-out');
-function updateTemp() {
-  const temp = parseFloat(tempSlider.value);
-  tempVal.textContent = '+' + temp + '°C';
-  // Stima indicativa: ogni +1°C ~ -3% conc. spermatica (molto ipotetico)
-  const impact = Math.round(temp * -3);
-  tempOut.textContent = (impact >= 0 ? '+' : '') + impact + '%';
-  tempOut.style.color = impact < 0 ? '#A32D2D' : '#14304E';
-  if (temp === 0) {
-    riskOut.textContent = 'Nessuno';
-    riskOut.style.color = '#3B6D11';
-  } else if (temp <= 1.5) {
-    riskOut.textContent = 'Basso';
-    riskOut.style.color = '#C77E00';
-  } else if (temp <= 3) {
-    riskOut.textContent = 'Moderato';
-    riskOut.style.color = '#C77E00';
-  } else {
-    riskOut.textContent = 'Elevato';
-    riskOut.style.color = '#A32D2D';
-  }
-}
-tempSlider.addEventListener('input', updateTemp);
-updateTemp();
-</script>
+            const openModal = (modalId) => {
+                const targetModal = document.getElementById(modalId);
+                if (targetModal) {
+                    targetModal.classList.add('open');
+                    document.body.style.overflow = 'hidden';
+                }
+            };
 
+            const closeModal = (modal) => {
+                modal.classList.remove('open');
+                const anyOpen = Array.from(modals).some(m => m.classList.contains('open'));
+                if (!anyOpen) {
+                    document.body.style.overflow = '';
+                }
+            };
+
+            openModalLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const modalId = link.getAttribute('data-modal');
+                    openModal(modalId);
+                });
+            });
+
+            closeButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const parentModal = btn.closest('.modal-backdrop');
+                    if (parentModal) closeModal(parentModal);
+                });
+            });
+
+            modals.forEach(modal => {
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        closeModal(modal);
+                    }
+                });
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    modals.forEach(modal => {
+                        if (modal.classList.contains('open')) closeModal(modal);
+                    });
+                }
+            });
+        });
+    </script>
 </body>
 </html>
