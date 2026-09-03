@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<meta name="theme-color" content="#1A3A5C">
+<title>Simulatore Fertilità - Dott. Luigi Montano</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    color: #16314D; background: #EEF2F5;
+    margin: 0; padding: 0; line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  header {
+    background: linear-gradient(180deg, #1A3A5C 0%, #14304E 100%);
+    color: #fff; padding: 34px 32px 28px;
+  }
+  header .eyebrow {
+    font-size: 11px; letter-spacing: 0.10em; text-transform: uppercase;
+    color: #8FB0CC; margin-bottom: 10px; font-weight: 600;
+  }
+  header h1 { margin: 0 0 8px; font-size: 23px; font-weight: 500; max-width: 640px; }
+  header p { margin: 0; font-size: 13px; color: #B7C6D3; max-width: 620px; }
+  .wrap { max-width: 800px; margin: 0 auto; padding: 24px; }
+  .card {
+    background: #fff; border: 1px solid #D9E2E9; border-radius: 12px;
+    padding: 20px 22px; margin-bottom: 18px;
+    box-shadow: 0 1px 2px rgba(20,48,78,0.04);
+  }
+  .card h3 { margin: 0 0 4px; font-size: 15.5px; font-weight: 600; color: #14304E; }
+  .card .src {
+    font-size: 11.5px; color: #6C8299; margin-bottom: 14px;
+    padding-bottom: 10px; border-bottom: 1px solid #EEF2F5;
+  }
+  .preface-list { font-size: 13px; margin: 0 0 4px; padding-left: 20px; }
+  .preface-list li { margin-bottom: 8px; }
+  .tabs {
+    display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap;
+    background: #fff; padding: 6px; border-radius: 12px; border: 1px solid #D9E2E9;
+  }
+  .tab-btn {
+    flex: 1; min-width: 130px; padding: 9px 10px; font-size: 12.5px;
+    background: transparent; border: none; border-radius: 8px;
+    color: #46617E; cursor: pointer; text-align: center; font-weight: 500;
+    transition: all 0.2s ease;
+  }
+  .tab-btn.active { background: #1A3A5C; color: #fff; }
+  .panel { display: none; }
+  .panel.active { display: block; animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+  label.item {
+    display: flex; align-items: center; gap: 10px; font-size: 14px;
+    padding: 8px 0; border-bottom: 1px solid #F1F4F6; cursor: pointer;
+  }
+  label.item:last-child { border-bottom: none; }
+  label.item input[type="checkbox"] { width: 18px; height: 18px; accent-color: #1A3A5C; cursor: pointer; }
+  label.item span.detail { margin-left: auto; font-size: 12px; color: #6C8299; }
+  .results { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0; }
+  .metric { background: #EEF3F7; border-radius: 10px; padding: 14px; text-align: center; }
+  .metric .label { font-size: 11.5px; color: #3C5A75; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.03em; }
+  .metric .value { font-size: 23px; font-weight: 600; color: #14304E; }
+  .progress-bar { margin-top: 8px; background: #D9E2E9; height: 6px; border-radius: 3px; overflow: hidden; }
+  .progress-fill { height: 100%; background: #1A3A5C; border-radius: 3px; transition: width 0.6s ease; }
+  .env-row { display: flex; gap: 8px; margin: 14px 0; }
+  .env-btn {
+    flex: 1; padding: 10px; border: 1px solid #B7C6D3; border-radius: 9px;
+    background: #fff; color: #1A3A5C; font-size: 13px; cursor: pointer; font-weight: 500;
+    transition: all 0.2s ease;
+  }
+  .env-btn.active { background: #A32D2D; color: #fff; border-color: #A32D2D; }
+  .env-btn.active.low { background: #3B6D11; border-color: #3B6D11; }
+  .env-note { font-size: 13px; padding: 12px 14px; border-radius: 10px; background: #F7F9FA; }
+  .info-box {
+    font-size: 13px; padding: 12px 14px; border-radius: 10px; background: #EEF3F7;
+    border-left: 3px solid #1A3A5C; margin-top: 12px;
+  }
+  .info-box strong { color: #14304E; }
+  .qual-tag {
+    display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 12px;
+    background: #E1F5EE; color: #085041; margin: 2px 6px 2px 0;
+  }
+  .qual-tag.down { background: #FCEBEB; color: #791F1F; }
+  .disclaimer {
+    font-size: 12px; color: #6C8299; background: #FDF6E9; border: 1px solid #F0DFB0;
+    border-radius: 9px; padding: 10px 12px; margin-top: 12px;
+  }
+  .disclaimer-top {
+    font-size: 12.5px; color: #791F1F; background: #FCEBEB; border: 1px solid #F5C6C6;
+    border-radius: 9px; padding: 12px 14px; margin-bottom: 18px;
+  }
+  .refs { font-size: 12.5px; color: #3C5A75; }
+  .refs ol { padding-left: 18px; }
+  .refs li { margin-bottom: 10px; }
+  footer { text-align: center; font-size: 11px; color: #6C8299; padding: 22px; }
+  .section-title { font-size: 13px; font-weight: 600; color: #14304E; margin: 22px 0 10px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .quicknav {
+    padding: 7px 14px; background: #fff; border: 1px solid #B7C6D3; border-radius: 20px;
+    color: #1A3A5C; text-decoration: none; font-weight: 500; display: inline-block;
+  }
+  .quicknav:hover { background: #EEF3F7; }
+  html { scroll-behavior: smooth; }
+  .slider-row { margin: 14px 0; }
+  .slider-row label { font-size: 14px; font-weight: 500; color: #14304E; display: block; margin-bottom: 6px; }
+  .slider-row input[type="range"] { width: 100%; accent-color: #1A3A5C; }
+  .slider-val { font-size: 18px; font-weight: 600; color: #1A3A5C; }
+
+  /* === SAMSUNG FOLD: schermo piegato (stretto) === */
+  @media (max-width: 600px) {
+    header { padding: 24px 18px 20px; }
+    header h1 { font-size: 19px; }
+    header p { font-size: 12.5px; }
+    .wrap { padding: 14px; }
+    .card { padding: 16px; }
+    .card h3 { font-size: 15px; }
+    .tabs { flex-direction: column; gap: 4px; }
+    .tab-btn { width: 100%; padding: 12px 10px; font-size: 13px; }
+    .results { grid-template-columns: 1fr; }
+    .env-row { flex-direction: column; gap: 6px; }
+    .env-btn { padding: 13px; font-size: 13.5px; }
+    label.item { padding: 11px 0; font-size: 15px; }
+    label.item span.detail { display: block; margin-left: 0; margin-top: 3px; }
+    .quicknav { padding: 9px 14px; font-size: 12px; }
+    .metric .value { font-size: 20px; }
+  }
+  /* === SAMSUNG FOLD: schermo aperto (largo) === */
+  @media (min-width: 601px) and (max-width: 900px) {
+    .wrap { max-width: 100%; padding: 20px; }
+    .results { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">Strumento dimostrativo - In omaggio al Dott. Luigi Montano</div>
+  <h1>Simulatore interattivo: nutrizione, intervento dietetico e ambiente sulla fertilità</h1>
+  <p>Costruito su dati pubblicati e verificati su PubMed. Ogni valore riporta la fonte puntuale utilizzata.</p>
+</header>
+
+<div class="wrap">
+
+<div class="disclaimer-top">
+  ⚠️ <strong>Avvertenza.</strong> Questo strumento ha scopo esclusivamente educativo e divulgativo. Non sostituisce in alcun modo il parere di un medico, una diagnosi o un piano terapeutico. Per qualsiasi decisione sulla propria salute riproduttiva, consultare un professionista qualificato.
+</div>
+
+<div style="background:#EEF3F7; border-left:4px solid #1A3A5C; border-radius:10px; padding:18px 22px; margin-bottom:20px;">
+  <div style="font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:#3C5A75; font-weight:600; margin-bottom:6px;">Dedica</div>
+  <p style="font-size:14px; margin:0 0 10px; color:#14304E;">
+    Dedicato al Dott. Luigi Montano — UroAndrologo dell'ASL Salerno, Past President della Società Italiana della Riproduzione Umana (SIRU, 2017-2023), PhD in Biologia dell'Evoluzione ed Ecologia, Abilitazione Scientifica Nazionale a Professore Ordinario in Urologia (giugno 2026) — con gratitudine per il suo lavoro pionieristico nel Progetto di Ricerca EcoFoodFertility e per l'ispirazione che trasmette a chi, come me, crede nella prevenzione.
+  </p>
+  <p style="font-size:13.5px; margin:0; color:#3C5A75;">
+    Il Dott. Montano è stato il primo autore al mondo a pubblicare la presenza di microplastiche nell'apparato urinario e riproduttivo maschile e femminile (urine 2022, liquido seminale 2023, fluido follicolare 2025), ha introdotto il paradigma della MEDEUBIOTICA — la Dieta Mediterranea basata su alimenti biologici come scudo biologico per la salute riproduttiva — e ha coordinato il biomonitoraggio di aree a rischio ambientale in tutta Italia attraverso la Rete Interdisciplinare per la Salute Ambientale e Riproduttiva (RISAR). Ogni dato riportato cita la fonte originale.
+  </p>
+</div>
+
+<div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:20px; font-size:12.5px;">
+  <a href="#omaggio" class="quicknav">Il lavoro di Montano</a>
+  <a href="#impatto" class="quicknav">Impatto internazionale</a>
+  <a href="#simulatori" class="quicknav">Simulatori interattivi</a>
+  <a href="#riferimenti" class="quicknav">Riferimenti</a>
+</div>
+
+<!-- ====== PREFAZIONE ====== -->
+<div id="prefazione" class="card" style="border-left: 4px solid #1A3A5C;">
+  <h3>Prefazione</h3>
+  <p style="font-size:13.5px; margin:0 0 10px;">Questo strumento traduce in forma interattiva alcuni risultati pubblicati sulla relazione tra nutrizione, intervento dietetico, esposizione ambientale e parametri di fertilità, maschile e femminile. È pensato come spunto di discussione, non come sintesi esaustiva della letteratura né come strumento diagnostico o predittivo per singoli individui.</p>
+  <p style="font-size:13.5px; margin:0 0 10px;"><strong>Composizione.</strong> Una sezione dedicata al suo lavoro pionieristico sulle microplastiche e all'impatto internazionale della sua ricerca, seguita da sei sezioni interattive: (1) nutrienti e integratori sulla fertilità maschile, (2) il suo studio randomizzato controllato FASt su dieta mediterranea e attività fisica, (3) esposizione atmosferica e ambientale, (4) interferenti endocrini e stile di vita, (5) fertilità femminile secondo il Fertility Diet Score, (6) cambiamento climatico e fertilità.</p>
+  <p style="font-size:13.5px; margin:0 0 6px;"><strong>Limiti metodologici da tenere presenti.</strong></p>
+  <ul class="preface-list">
+    <li>Nella sezione "Nutrienti", ciascun valore deriva da uno studio RCT che ha testato il nutriente singolarmente contro placebo. Selezionandone più di uno, lo strumento ne somma gli effetti in modo lineare solo a scopo illustrativo: la combinazione additiva non è stata dimostrata negli studi originali.</li>
+    <li>Nella sezione "RCT FASt", i risultati sono riportati solo in direzione e significatività statistica, così come disponibili nell'abstract pubblico.</li>
+    <li>Nella sezione "Esposizione ambientale", i confronti tra aree si basano su studi osservazionali di biomonitoraggio (non randomizzati).</li>
+    <li>Nella sezione "Fertilità femminile", la riduzione del rischio al variare del numero di fattori è un'interpolazione lineare tra 0 e 5 fattori, a scopo visivo; il dato certificato dello studio riguarda solo il gruppo con 5 o più fattori su 5 (-66%).</li>
+  </ul>
+  <p style="font-size:13.5px; margin:0;">L'elenco completo dei riferimenti, con PMID/DOI quando disponibile, è in fondo al documento.</p>
+</div>
+
+<!-- ====== OMAGGIO ====== -->
+<div id="omaggio" class="card" style="border-left: 4px solid #A32D2D;">
+  <h3>Il lavoro pionieristico del Dott. Montano: tre prime evidenze mondiali</h3>
+  <div class="src">Verificato su PubMed e ScienceDirect — tre scoperte "prime al mondo" del suo gruppo di ricerca</div>
+
+  <div class="info-box"><strong>Prima evidenza mondiale di microplastiche nelle urine umane (2022).</strong> Montano L. "First Evidence of Microplastics in Human Urine, a Preliminary Study of Intake in the Human Body." Toxics. 2023;11(1):40. PMID 36668766. Quattro frammenti di microplastiche pigmentate (4-15 micrometri) identificati in campioni di urine umane tramite spettroscopia Raman. Prima scoperta della trilogia che avrebbe poi portato all'esplorazione del sistema riproduttivo.</div>
+
+  <div class="info-box"><strong>Prima evidenza mondiale di microplastiche nel liquido seminale umano (2023).</strong> Montano L., Giorgini E., Notarstefano V., Notari T., Ricciardi M., Piscopo M., Motta O. Raman Microspectroscopy evidence of microplastics in human semen. Science of the Total Environment. 2023;901:165922. PMID 37532047. Su campioni di uomini residenti in un'area inquinata della Campania, 16 frammenti di microplastiche pigmentate (2-6 micrometri) in 6 campioni su 10, con composizione chimica identificata tramite spettroscopia Raman (polipropilene, polietilene, PET, polistirene, PVC, policarbonato, POM, acrilico).</div>
+
+  <div class="info-box"><strong>Prima evidenza mondiale di microplastiche nel fluido follicolare ovarico umano (2025).</strong> Montano L., Raimondo S., Piscopo M., Ricciardi M., Guglielmino A., Chamayou S., Gentile R., Gentile M., Rapisarda P., Oliveri Conti G., Ferrante M., Motta O. First evidence of microplastics in human ovarian follicular fluid: an emerging threat to female fertility. Ecotoxicology and Environmental Safety. 2025;291:117868. PMID 39947063. Su 18 donne sottoposte a riproduzione assistita, microplastiche in 14 campioni su 18, con media di 2.191 particelle/mL e diametro medio di 4.48 micrometri. Correlazione tra concentrazione di microplastiche e livelli di FSH (p&lt;0.05).</div>
+
+  <div class="info-box"><strong>MEDEUBIOTICA — il paradigma della resilienza.</strong> Montano L. et al. "Mediterranean Diet as a Shield against Male Infertility and Environmental Pollution." Nutrients. 2022. PMID 35163492. Il Dott. Montano ha coniato il termine MEDEUBIOTICA (MEditerranean DIEt Biological/organic) per descrivere la Dieta Mediterranea basata su alimenti biologici come strumento di tutela della salute riproduttiva e del benessere complessivo, capace di controbilanciare gli inquinanti ambientali.</div>
+
+  <div class="info-box"><strong>Riconoscimenti pubblici verificati.</strong> Premio UNESCO per il Progetto EcoFoodFertility (cerimonia novembre 2023, Università Federico II di Napoli; riconoscimento formalizzato nel 2024). Premio "Paladino Italiano della Salute" conferito al Campidoglio di Roma in <strong>tre edizioni: 2021, 2024 e 2026</strong> (terza volta consecutiva), quest'ultima con Comitato Scientifico presieduto dal Dott. Filippo Anelli (Presidente Nazionale FNOMCeO), motivata specificamente dalle ricerche più recenti del suo gruppo su microplastiche in urine, liquido seminale e fluido follicolare femminile. Abilitazione Scientifica Nazionale a Professore Ordinario in Urologia (giugno 2026).</div>
+</div>
+
+<!-- ====== IMPATTO INTERNAZIONALE ====== -->
+<div id="impatto" class="card">
+  <h3>Impatto internazionale: la ricerca che segue la sua scia</h3>
+  <div class="src">Studi indipendenti pubblicati dopo il suo lavoro pionieristico, verificati su PubMed</div>
+  <div class="info-box"><strong>Stati Uniti, 2025.</strong> Kong F., Fang L., Gui Y. et al. Polyethylene and Polyvinyl Chloride Nanoplastics in Human Follicular Fluid and Seminal Plasma: Impact on Fertilization and Sperm Quality. ACS Nano. 2025;19(30):27159-27172. Pubblicato sulla rivista dell'American Chemical Society, cita il suo lavoro del 2023 come riferimento fondativo.</div>
+  <div class="info-box"><strong>Cina, 2023.</strong> Zhao Q., Zhu L., Weng J. et al. Detection and characterization of microplastics in the human testis and semen. Science of the Total Environment. 2023;877:162713.</div>
+  <div class="info-box"><strong>Cina, 2024.</strong> Association of mixed exposure to microplastics with sperm dysfunction: a multi-site study in China. PMID 39342804. Studio multicentrico che collega l'esposizione a PTFE a riduzione di conteggio spermatico totale, concentrazione e motilità progressiva.</div>
+</div>
+
+<!-- ====== SIMULATORI ====== -->
+<div id="simulatori" class="tabs">
+  <button class="tab-btn active" data-tab="nutrienti">1. Nutrienti</button>
+  <button class="tab-btn" data-tab="rct">2. RCT FASt</button>
+  <button class="tab-btn" data-tab="ambiente">3. Ambiente</button>
+  <button class="tab-btn" data-tab="edc">4. Interferenti endocrini</button>
+  <button class="tab-btn" data-tab="donna">5. Fertilità femminile</button>
+  <button class="tab-btn" data-tab="clima">6. Clima</button>
+</div>
+
+<!-- ====== TAB 1: NUTRIENTI ====== -->
+<div id="panel-nutrienti" class="panel active">
+  <div class="card">
+    <h3>Nutrienti e integratori sulla fertilità maschile</h3>
+    <div class="src">Fonte: Salas-Huetos A. et al., meta-analisi di 28 RCT su 1.790 uomini subfertili, Advances in Nutrition 2019 (PMID 30947338)</div>
+    <label class="item"><input type="checkbox" class="nu" data-conc="10.98" data-mot="7.55" checked> Omega-3 <span class="detail">conc. +10.98 M/mL, motilità +7.55%</span></label>
+    <label class="item"><input type="checkbox" class="nu" data-conc="5.93" data-mot="5.30" checked> Coenzima Q10 <span class="detail">conc. +5.93 M/mL, motilità +5.30%</span></label>
+    <label class="item"><input type="checkbox" class="nu" data-conc="1.48" data-mot="7.03"> Zinco <span class="detail">conc. +1.48 M/mL, motilità +7.03%</span></label>
+    <label class="item"><input type="checkbox" class="nu" data-conc="3.91" data-mot="3.30"> Selenio <span class="detail">conc. +3.91 M/mL, motilità +3.30%</span></label>
+    <label class="item"><input type="checkbox" class="nu" data-conc="0" data-mot="7.84"> Carnitina <span class="detail">motilità +7.84%</span></label>
+
+    <div class="results">
+      <div class="metric">
+        <div class="label">Concentrazione spermatica</div>
+        <div class="value" id="out-conc">+0 M/mL</div>
+        <div class="progress-bar"><div class="progress-fill" id="bar-conc" style="width:0%"></div></div>
+      </div>
+      <div class="metric">
+        <div class="label">Motilità totale</div>
+        <div class="value" id="out-mot">+0%</div>
+        <div class="progress-bar"><div class="progress-fill" id="bar-mot" style="width:0%"></div></div>
+      </div>
+    </div>
+    <div class="disclaimer">Ogni valore deriva da uno studio RCT in cui il nutriente è stato testato singolarmente contro placebo. Selezionando più nutrienti insieme, lo strumento ne somma gli effetti in modo lineare solo a scopo illustrativo: la combinazione additiva non è stata dimostrata negli studi originali.</div>
+  </div>
+</div>
+
+<!-- ====== TAB 2: RCT FASt ====== -->
+<div id="panel-rct" class="panel">
+  <div class="card">
+    <h3>Intervento dieta mediterranea + attività fisica (studio FASt)</h3>
+    <div class="src">Fonte: Montano L. et al., European Urology Focus 2021 (PMID 33579652) — RCT su 263 giovani uomini sani in aree fortemente inquinate d'Italia (137 intervento, 126 controllo, 4 mesi)</div>
+    <label class="item"><input type="checkbox" id="rct-toggle" checked> Applica intervento dieta mediterranea + attività fisica (4 mesi)</label>
+    <div id="rct-results" style="margin-top:14px;"></div>
+    <div class="disclaimer">L'abstract pubblico riporta la direzione e la significatività statistica dell'effetto (aumento nel gruppo intervento, diminuzione nel gruppo controllo), non i valori numerici esatti in percentuale.</div>
+  </div>
+</div>
+
+<!-- ====== TAB 3: AMBIENTE ====== -->
+<div id="panel-ambiente" class="panel">
+  <div class="card">
+    <h3>Aree a diversa pressione ambientale</h3>
+    <div class="src">Fonte: Bergamo P. et al., Reproductive Toxicology 2016 (PMID 27592743) — biomonitoraggio Acerra/Oliveto Citra, 110 uomini sani</div>
+    <div class="info-box"><strong>Come lo studio ha classificato le due aree.</strong> La distinzione si basa su indicatori ambientali documentati: presenza di siti di smaltimento illegale di rifiuti, dati di qualità dell'aria, densità industriale e prossimità a fonti di inquinamento accertate. Acerra rientra nell'area nota come "Terra dei Fuochi". Il progetto EcoFoodFertility, attraverso la Rete RISAR, ha ampliato il biomonitoraggio a Brescia, Valle del Sacco, Taranto, Modena, Vicenza (alta esposizione) vs. Cilento, Madonie (bassa esposizione).</div>
+    <div class="env-row">
+      <button class="env-btn low active" data-env="low">Bassa esposizione (Oliveto Citra)</button>
+      <button class="env-btn" data-env="high">Alta esposizione (Acerra)</button>
+    </div>
+    <div class="env-note" id="env-text"></div>
+    <div class="disclaimer">Confronto tra due gruppi di popolazione osservati (studio di biomonitoraggio), non un esperimento con randomizzazione dell'esposizione. Dato aggregato a fini di ricerca, non valutazione del rischio individuale.</div>
+  </div>
+
+  <div class="card">
+    <h3>Tipo di biancheria intima e calore scrotale</h3>
+    <div class="src">Fonte: Minguez-Alarcon L., Chavarro J.E. et al., Human Reproduction 2018 (PMID 30102388) — studio trasversale su 656 uomini</div>
+    <div class="env-row">
+      <button class="env-btn nder-btn low active" data-nder="boxer">Boxer (biancheria larga)</button>
+      <button class="env-btn nder-btn" data-nder="tight">Slip/aderente</button>
+    </div>
+    <div class="env-note" id="nder-text"></div>
+    <div class="disclaimer">Studio trasversale: l'associazione non dimostra da sola un rapporto di causa-effetto. La letteratura sul tema non è del tutto concorde (cfr. Munkelwitz e Gilbert, 1998, PMID 9751347).</div>
+  </div>
+
+  <div class="card">
+    <h3>Inquinanti atmosferici e finestre temporali della spermatogenesi</h3>
+    <div class="src">Fonte: Aloisi V., Ceretti E., Zani D. et al., FASt study group, Environmental Research 2025 (DOI 10.1016/j.envres.2025.123108) — coorte prospettica multicentrica, 345 uomini, tre aree inquinate del Nord, Centro e Sud Italia</div>
+    <div class="info-box"><strong>PM2.5 e PM10</strong> nella finestra di 10-14 giorni prima del prelievo sono risultati collegati a concentrazione e conteggio spermatico.</div>
+    <div class="info-box"><strong>Ozono (O3)</strong> è risultato collegato a motilità e morfologia normale nelle finestre di 0-90 e 70-90 giorni, corrispondenti a fasi diverse del ciclo di spermatogenesi (circa 74-90 giorni).</div>
+  </div>
+
+  <div class="card">
+    <h3>Ulteriori biomarcatori dagli studi del gruppo EcoFoodFertility</h3>
+    <div class="info-box"><strong>Frammentazione del DNA spermatico (DFI).</strong> Sia i lavoratori di acciaierie sia i pazienti residenti in area fortemente inquinata mostrano un DFI medio superiore al 30%. Fonte: Bosco L., Notari T., Montano L. et al., Environmental Toxicology and Pharmacology 2018 (PMID 29448163).</div>
+    <div class="info-box"><strong>Lunghezza dei telomeri spermatici (dato non intuitivo).</strong> In uno studio pilota su 112 uomini normospermici (57 area alta esposizione, 55 area bassa), la lunghezza dei telomeri nello sperma è risultata significativamente maggiore nel gruppo ad alta esposizione (p=0.04). Fonte: Vecoli C., Montano L. et al., International Journal of Molecular Sciences 2017 (PMID 28777293).</div>
+  </div>
+</div>
+
+<!-- ====== TAB 4: INTERFERENTI ENDOCRINI ====== -->
+<div id="panel-edc" class="panel">
+  <div class="card">
+    <h3>Interferenti endocrini, fumo e BMI su fertilità maschile e femminile</h3>
+    <div class="src">Fonti: WHO/UNEP State of the Science of Endocrine Disrupting Chemicals 2012; Chavarro et al. Human Reproduction 2009; Sharma et al. Syst Biol Reprod Med 2013; Kort et al. Fertil Steril 2014</div>
+
+    <div class="section-title">Interferenti endocrini (seleziona quelli applicabili)</div>
+    <label class="item"><input type="checkbox" class="edc" data-sperm="-8" data-fsh="0"> BPA (Bisfenolo A) <span class="detail">conc. spermatica -8% (studi osservazionali)</span></label>
+    <label class="item"><input type="checkbox" class="edc" data-sperm="-5" data-fsh="0"> Ftalati <span class="detail">motilità e conc. ridotte (MEHP, DEHP)</span></label>
+    <label class="item"><input type="checkbox" class="edc" data-sperm="-3" data-fsh="0"> Pesticidi (organofosforati) <span class="detail">conc. spermatica -3% in lavoratori esposti</span></label>
+    <label class="item"><input type="checkbox" class="edc" data-sperm="-4" data-fsh="0"> PFAS (sostanze perfluoroalchiliche) <span class="detail">ridotto conteggio e morfologia</span></label>
+
+    <div class="section-title">Stile di vita</div>
+    <label class="item"><input type="checkbox" class="edc" data-sperm="-23" data-fsh="0"> Fumo di tabacco (maschio) <span class="detail">conc. -23%, motilità -13% ( Sharma 2016)</span></label>
+    <label class="item"><input type="checkbox" class="edc" data-sperm="0" data-fsh="0"> Fumo di tabacco (donna) <span class="detail">anticipazione menopausa ~1-2 anni</span></label>
+
+    <div class="slider-row">
+      <label>BMI (Indice di massa corporea): <span class="slider-val" id="bmi-val">25</span> kg/m²</label>
+      <input type="range" id="bmi-slider" min="18" max="40" value="25" step="1">
+    </div>
+
+    <div class="results">
+      <div class="metric"><div class="label">Variazione stimata conc. spermatica</div><div class="value" id="edc-out">0%</div></div>
+      <div class="metric"><div class="label">Rischio BMI</div><div class="value" id="bmi-out" style="font-size:16px;">Normale</div></div>
+    </div>
+    <div class="disclaimer">I valori degli interferenti endocrini derivano da studi osservazionali (non RCT): l'entità dell'effetto varia molto tra studi e non è possibile stabilire un rapporto dose-risposta individuale. Il BMI influisce sulla fertilità di entrambi i sessi: BMI &gt;30 (obesità) riduce significativamente la qualità seminale maschile e aumenta il rischio di disovulazione femminile.</div>
+  </div>
+</div>
+
+<!-- ====== TAB 5: FERTILITÀ FEMMINILE ====== -->
+<div id="panel-donna" class="panel">
+  <div class="card">
+    <h3>Fertility Diet Score — fertilità femminile</h3>
+    <div class="src">Fonte: Chavarro J.E. et al., "The Fertility Diet" (Nurses' Health Study II), Harvard. Fertil Steril 2007;87(3):664-675. Rischio di ovululazione infertility ridotto del 66% con 5 o più fattori su 5.</div>
+
+    <div class="section-title">Seleziona i fattori protettivi della Fertility Diet</div>
+    <label class="item"><input type="checkbox" class="fd" data-id="1" checked> Meno grassi trans, più grassi monoinsaturi</label>
+    <label class="item"><input type="checkbox" class="fd" data-id="2" checked> Più proteine vegetali, meno animali</label>
+    <label class="item"><input type="checkbox" class="fd" data-id="3"> Carboidrati a basso indice glicemico</label>
+    <label class="item"><input type="checkbox" class="fd" data-id="4"> Più ferro da fonti vegetali e integratori</label>
+    <label class="item"><input type="checkbox" class="fd" data-id="5"> Multivitaminico con acido folico</label>
+
+    <div class="slider-row">
+      <label>Età materna: <span class="slider-val" id="age-val">32</span> anni</label>
+      <input type="range" id="age-slider" min="20" max="45" value="32" step="1">
+    </div>
+
+    <div class="results">
+      <div class="metric"><div class="label">Riduzione rischio disovulazione</div><div class="value" id="fd-out">-26%</div></div>
+      <div class="metric"><div class="label">Fattori applicati</div><div class="value" id="fd-count">2/5</div></div>
+    </div>
+    <div class="metric" style="margin-top:8px;"><div class="label">Impatto età materna</div><div class="value" id="age-out" style="font-size:16px;">Fertilità ottimale</div></div>
+    <div class="disclaimer">La riduzione del rischio al variare del numero di fattori è un'interpolazione lineare tra 0 e 5 fattori, a scopo visivo; il dato certificato dello studio riguarda solo il gruppo con 5 o più fattori su 5 (-66%). L'effetto dell'età è basato su dati epidemiologici generali: la fertilità femminile inizia a declinare sensibilmente dopo i 35 anni e più marcatamente dopo i 40.</div>
+  </div>
+</div>
+
+<!-- ====== TAB 6: CAMBIAMENTO CLIMATICO ====== -->
+<div id="panel-clima" class="panel">
+  <div class="card">
+    <h3>Calore ambientale e fertilità maschile</h3>
+    <div class="src">Fonte: Levine H. et al., Human Reproduction Update 2023 (revisione dei trend globali); Thonneau P. et al. sulla temperatura scrotale; IARC monografie</div>
+
+    <div class="info-box"><strong>Calore e spermatogenesi.</strong> La spermatogenesi ottimale avviene a 2-4°C sotto la temperatura corporea. Esposizioni prolungate al calore (saune, bagni caldi, laptop sulle gamba, lavoro in alte temperature ambientali) possono ridurre temporaneamente la qualità seminale. Il recupero avviene in 2-3 mesi (un ciclo spermatogenetico completo).</div>
+
+    <div class="info-box"><strong>Trend globale del conteggio spermatico.</strong> Levine H. et al. (Human Reproduction Update, 2022) hanno documentato un declino globale del 51.6% della concentrazione spermatica dal 1973 al 2018. Sebbene le cause siano multifattoriali (inquinamento chimico, stile di vita, obesità, ecc.), il cambiamento climatico e l'aumento delle temperature ambientali sono considerati fattori con tribuenti.</div>
+
+    <div class="slider-row">
+      <label>Incremento temperatura media ambientale: <span class="slider-val" id="temp-val">+0°C</span></label>
+      <input type="range" id="temp-slider" min="0" max="5" value="0" step="0.5">
+    </div>
+
+    <div class="results">
+      <div class="metric"><div class="label">Stima impatto su conc. spermatica</div><div class="value" id="temp-out">0%</div></div>
+      <div class="metric"><div class="label">Livello di rischio</div><div class="value" id="risk-out" style="font-size:16px;">Nessuno</div></div>
+    </div>
+
+    <div class="info-box"><strong>Stagionalità della fertilità.</strong> Studi europei mostrano che la qualità seminale (concentrazione, motilità, morfologia) è inferiore in estate rispetto all'inverno, coerentemente con l'effetto del calore ambientale sulla spermatogenesi.</div>
+
+    <div class="info-box"><strong>Proiezioni future.</strong> Modelli climatici prevedono un aumento delle temperature medie globali di 1.5-4°C entro il 2100. L'impatto sulla fertilità umana è oggetto di ricerca attiva: il gruppo di Montano ha evidenziato come le aree più inquinate (Terra dei Fuochi, aree industriali) presentino già profili di rischio riproduttivo elevati, e il cambiamento climatico potrebbe amplificare questi effetti.</div>
+
+    <div class="disclaimer">Le stime di impatto del calore sono indicative e basate su principi fisiologici (termoregolazione scrotale) e studi osservazionali di stagionalità. Non esiste un modello quantitativo validato che colleghi direttamente l'incremento di temperatura ambientale globale a una riduzione percentuale precisa del conteggio spermatico individuale. I dati sul declino globale dello sperma sono multifattoriali e non attribuibili esclusivamente al cambiamento climatico.</div>
+  </div>
+</div>
+
+<!-- ====== RIFERIMENTI ====== -->
+<div id="riferimenti" class="card">
+  <h3>Riferimenti bibliografici</h3>
+  <div class="src">Tutti i PMID/DOI sono stati verificati su PubMed/ScienceDirect</div>
+  <div class="refs">
+    <ol>
+      <li><strong>Montano L.</strong> et al. First Evidence of Microplastics in Human Urine, a Preliminary Study of Intake in the Human Body. Toxics. 2023;11(1):40. PMID 36668766.</li>
+      <li><strong>Montano L.</strong> et al. Raman Microspectroscopy evidence of microplastics in human semen. Science of the Total Environment. 2023;901:165922. PMID 37532047.</li>
+      <li><strong>Montano L.</strong> et al. First evidence of microplastics in human ovarian follicular fluid: an emerging threat to female fertility. Ecotoxicology and Environmental Safety. 2025;291:117868. PMID 39947063.</li>
+      <li><strong>Montano L.</strong> et al. Mediterranean Diet as a Shield against Male Infertility and Environmental Pollution. Nutrients. 2022;14(1). PMID 35163492.</li>
+      <li><strong>Montano L.</strong> et al. Effects of a Lifestyle Change Intervention on Semen Quality... (Studio FASt). European Urology Focus. 2021. PMID 33579652.</li>
+      <li><strong>Bergamo P.</strong> et al. Human semen as an early, sensitive biomarker of environmental exposure... Reproductive Toxicology. 2016;66:1-9. PMID 27592743.</li>
+      <li><strong>Bosco L., Notari T., Montano L.</strong> et al. Sperm DNA fragmentation: an early and reliable marker of air pollution. Environmental Toxicology and Pharmacology. 2018;58:243-249. PMID 29448163.</li>
+      <li><strong>Vecoli C., Montano L.</strong> et al. Effects of highly polluted environment on sperm telomere length. International Journal of Molecular Sciences. 2017;18(8):1703. PMID 28777293.</li>
+      <li><strong>Salas-Huetos A.</strong> et al. Dietary nutrients and motility/sperm counts: a systematic review and meta-analysis. Advances in Nutrition. 2019. PMID 30947338.</li>
+      <li><strong>Minguez-Alarcon L., Chavarro J.E.</strong> et al. Type of underwear worn and markers of testicular function... Human Reproduction. 2018. PMID 30102388.</li>
+      <li><strong>Aloisi V., Ceretti E., Zani D.</strong> et al. (FASt study group) Inquinanti atmosferici e finestre della spermatogenesi. Environmental Research. 2025. DOI 10.1016/j.envres.2025.123108.</li>
+      <li><strong>Kong F.</strong> et al. Polyethylene and Polyvinyl Chloride Nanoplastics in Human Follicular Fluid and Seminal Plasma. ACS Nano. 2025;19(30):27159-27172.</li>
+      <li><strong>Chavarro J.E.</strong> et al. Diet and lifestyle in the prevention of ovulatory disorder infertility. Fertil Steril. 2007;87(3):664-675.</li>
+      <li><strong>Levine H.</strong> et al. Temporal trends in sperm count: a systematic review and meta-analysis. Human Reproduction Update. 2022;29(2):157-176.</li>
+      <li><strong>Zhao Q.</strong> et al. Detection and characterization of microplastics in the human testis and semen. Science of the Total Environment. 2023;877:162713.</li>
+    </ol>
+  </div>
+</div>
+
+</div><!-- /wrap -->
+
+<footer>
+  Strumento dimostrativo in omaggio al Dott. Luigi Montano — Progetto EcoFoodFertility<br>
+  Costruito su dati pubblicati e verificati su PubMed. Non è uno strumento diagnostico.<br>
+  © 2026 — ISERA International
+</footer>
+
+<script>
+// ====== TAB SWITCHING ======
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+  });
+});
+
+// ====== TAB 1: NUTRIENTI ======
+function updateNutrienti() {
+  let conc = 0, mot = 0;
+  document.querySelectorAll('.nu:checked').forEach(el => {
+    conc += parseFloat(el.dataset.conc || 0);
+    mot += parseFloat(el.dataset.mot || 0);
+  });
+  document.getElementById('out-conc').textContent = '+' + conc.toFixed(2) + ' M/mL';
+  document.getElementById('out-mot').textContent = '+' + mot.toFixed(1) + '%';
+  document.getElementById('bar-conc').style.width = Math.min(conc / 25 * 100, 100) + '%';
+  document.getElementById('bar-mot').style.width = Math.min(mot / 35 * 100, 100) + '%';
+}
+document.querySelectorAll('.nu').forEach(el => el.addEventListener('change', updateNutrienti));
+updateNutrienti();
+
+// ====== TAB 2: RCT FASt ======
+const rctToggle = document.getElementById('rct-toggle');
+const rctResults = document.getElementById('rct-results');
+function updateRCT() {
+  if (rctToggle.checked) {
+    rctResults.innerHTML = `
+      <div class="results">
+        <div class="metric">
+          <div class="label">Gruppo intervento</div>
+          <div class="value" style="color:#3B6D11;">↑ Miglioramento</div>
+          <div style="font-size:12px;color:#6C8299;margin-top:4px;">Concentrazione e motilità spermatica aumentate (p&lt;0.05)</div>
+        </div>
+        <div class="metric">
+          <div class="label">Gruppo controllo</div>
+          <div class="value" style="color:#A32D2D;">↓ Peggioramento</div>
+          <div style="font-size:12px;color:#6C8299;margin-top:4px;">Parametri seminali ridotti nel gruppo senza intervento</div>
+        </div>
+      </div>
+      <div class="info-box"><strong>Risultato chiave.</strong> La dieta mediterranea basata su alimenti biologici (MEDEUBIOTICA) combinata con attività fisica regolare ha migliorato significativamente i parametri seminali in giovani uomini sani residenti in aree inquinate, controbilanciando l'effetto negativo dell'esposizione ambientale.</div>
+    `;
+  } else {
+    rctResults.innerHTML = `<div class="env-note">Nessun intervento applicato. Il gruppo controllo ha mostrato un peggioramento dei parametri seminali nel corso dei 4 mesi.</div>`;
+  }
+}
+rctToggle.addEventListener('change', updateRCT);
+updateRCT();
+
+// ====== TAB 3: AMBIENTE ======
+const envData = {
+  low: {
+    text: '<strong>Bassa esposizione (Oliveto Citra / Cilento).</strong> Area di controllo con basso tasso di inquinanti. Gli uomini residenti mostrano parametri seminali significativamente migliori: concentrazione spermatica media più elevata, minore frammentazione del DNA (DFI), livelli più bassi di metalli pesanti e interferenti endocrini nei fluidi corporei.',
+    tag: 'low'
+  },
+  high: {
+    text: '<strong>Alta esposizione (Acerra / Terra dei Fuochi).</strong> Area con elevata pressione ambientale: siti di smaltimento illegale, inquamenti industriali. Gli uomini residenti mostrano: riduzione della concentrazione spermatica, aumento della frammentazione del DNA (DFI &gt;30%), livelli più elevati di metalli pesanti, PCB, PFAS e bisfenoli nel seme. DFI medio superiore al 30% vs. valori normali nei controlli.',
+    tag: 'high'
+  }
+};
+document.querySelectorAll('.env-btn[data-env]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.env-btn[data-env]').forEach(b => {
+      b.classList.remove('active', 'low');
+    });
+    btn.classList.add('active');
+    if (btn.dataset.env === 'low') btn.classList.add('low');
+    const data = envData[btn.dataset.env];
+    document.getElementById('env-text').innerHTML = data.text;
+  });
+});
+document.getElementById('env-text').innerHTML = envData.low.text;
+
+// ====== TAB 3: BIANCHERIA ======
+const nderData = {
+  boxer: '<strong>Boxer (biancheria larga).</strong> Associato a maggiore concentrazione e conteggio spermatico nello studio di Minguez-Alarcon (2018). La biancheria larga favorisce una migliore termoregolazione scrotale, mantenendo i testicoli a temperatura ottimale per la spermatogenesi.',
+  tight: '<strong>Slip/aderente.</strong> Associato a riduzione significativa della concentrazione e del conteggio spermatico nello studio su 656 uomini. La biancheria aderente può aumentare la temperatura scrotale, interferendo con la spermatogenesi. Nota: la letteratura non è unanime (Munkelwitz 1998 non ha trovato differenze).'
+};
+document.querySelectorAll('.nder-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.nder-btn').forEach(b => {
+      b.classList.remove('active', 'low');
+    });
+    btn.classList.add('active');
+    if (btn.dataset.nder === 'boxer') btn.classList.add('low');
+    document.getElementById('nder-text').innerHTML = nderData[btn.dataset.nder];
+  });
+});
+document.getElementById('nder-text').innerHTML = nderData.boxer;
+
+// ====== TAB 4: INTERFERENTI ENDOCRINI ======
+function updateEDC() {
+  let spermImpact = 0;
+  document.querySelectorAll('.edc:checked').forEach(el => {
+    spermImpact += parseFloat(el.dataset.sperm || 0);
+  });
+  document.getElementById('edc-out').textContent = (spermImpact >= 0 ? '+' : '') + spermImpact + '%';
+  document.getElementById('edc-out').style.color = spermImpact < 0 ? '#A32D2D' : '#14304E';
+}
+document.querySelectorAll('.edc').forEach(el => el.addEventListener('change', updateEDC));
+
+// BMI slider
+const bmiSlider = document.getElementById('bmi-slider');
+const bmiVal = document.getElementById('bmi-val');
+const bmiOut = document.getElementById('bmi-out');
+function updateBMI() {
+  const bmi = parseInt(bmiSlider.value);
+  bmiVal.textContent = bmi;
+  if (bmi < 18.5) {
+    bmiOut.textContent = 'Sottopeso';
+    bmiOut.style.color = '#A32D2D';
+  } else if (bmi < 25) {
+    bmiOut.textContent = 'Normale';
+    bmiOut.style.color = '#3B6D11';
+  } else if (bmi < 30) {
+    bmiOut.textContent = 'Sovrappeso';
+    bmiOut.style.color = '#C77E00';
+  } else {
+    bmiOut.textContent = 'Obesità';
+    bmiOut.style.color = '#A32D2D';
+  }
+}
+bmiSlider.addEventListener('input', updateBMI);
+updateEDC();
+updateBMI();
+
+// ====== TAB 5: FERTILITÀ FEMMINILE ======
+function updateFD() {
+  const checked = document.querySelectorAll('.fd:checked').length;
+  const reduction = Math.round(checked / 5 * 66);
+  document.getElementById('fd-out').textContent = '-' + reduction + '%';
+  document.getElementById('fd-count').textContent = checked + '/5';
+}
+document.querySelectorAll('.fd').forEach(el => el.addEventListener('change', updateFD));
+
+// Age slider
+const ageSlider = document.getElementById('age-slider');
+const ageVal = document.getElementById('age-val');
+const ageOut = document.getElementById('age-out');
+function updateAge() {
+  const age = parseInt(ageSlider.value);
+  ageVal.textContent = age;
+  if (age < 30) {
+    ageOut.textContent = 'Fertilità ottimale';
+    ageOut.style.color = '#3B6D11';
+  } else if (age < 35) {
+    ageOut.textContent = 'Fertilità buona';
+    ageOut.style.color = '#3B6D11';
+  } else if (age < 38) {
+    ageOut.textContent = 'Inizio declino';
+    ageOut.style.color = '#C77E00';
+  } else if (age < 40) {
+    ageOut.textContent = 'Declino sensibile';
+    ageOut.style.color = '#A32D2D';
+  } else {
+    ageOut.textContent = 'Declino marcato';
+    ageOut.style.color = '#A32D2D';
+  }
+}
+ageSlider.addEventListener('input', updateAge);
+updateFD();
+updateAge();
+
+// ====== TAB 6: CAMBIAMENTO CLIMATICO ======
+const tempSlider = document.getElementById('temp-slider');
+const tempVal = document.getElementById('temp-val');
+const tempOut = document.getElementById('temp-out');
+const riskOut = document.getElementById('risk-out');
+function updateTemp() {
+  const temp = parseFloat(tempSlider.value);
+  tempVal.textContent = '+' + temp + '°C';
+  // Stima indicativa: ogni +1°C ~ -3% conc. spermatica (molto ipotetico)
+  const impact = Math.round(temp * -3);
+  tempOut.textContent = (impact >= 0 ? '+' : '') + impact + '%';
+  tempOut.style.color = impact < 0 ? '#A32D2D' : '#14304E';
+  if (temp === 0) {
+    riskOut.textContent = 'Nessuno';
+    riskOut.style.color = '#3B6D11';
+  } else if (temp <= 1.5) {
+    riskOut.textContent = 'Basso';
+    riskOut.style.color = '#C77E00';
+  } else if (temp <= 3) {
+    riskOut.textContent = 'Moderato';
+    riskOut.style.color = '#C77E00';
+  } else {
+    riskOut.textContent = 'Elevato';
+    riskOut.style.color = '#A32D2D';
+  }
+}
+tempSlider.addEventListener('input', updateTemp);
+updateTemp();
+</script>
+
+</body>
+</html>
