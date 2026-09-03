@@ -27,7 +27,7 @@
         body {
             font-family: 'Montserrat', sans-serif;
             color: var(--text-dark);
-            background: var(--bg-light);
+            background: radial-gradient(at 100% 0%, rgba(26, 58, 92, 0.05) 0px, transparent 50%), radial-gradient(at 0% 100%, rgba(163, 45, 45, 0.04) 0px, transparent 50%), var(--bg-light);
             line-height: 1.6;
             scroll-behavior: smooth;
         }
@@ -62,9 +62,9 @@
         }
         /* Header & Navbar */
         .header-hero {
-            background: linear-gradient(180deg, var(--primary-color) 0%, #14304E 100%);
+            background: linear-gradient(135deg, #0b1e33 0%, #14304E 50%, #0d233a 100%);
             color: #FFFFFF;
-            padding: 120px 0 80px;
+            padding: 130px 0 90px;
             position: relative;
             overflow: hidden;
             text-align: center;
@@ -76,9 +76,24 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: url('https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=1600&q=80') no-repeat center center/cover;
-            opacity: 0.22;
+            background: 
+                radial-gradient(circle at 18% 28%, rgba(68, 142, 206, 0.26) 0%, transparent 48%),
+                radial-gradient(circle at 82% 72%, rgba(163, 45, 45, 0.22) 0%, transparent 45%),
+                radial-gradient(circle at 50% 50%, rgba(59, 109, 17, 0.12) 0%, transparent 60%),
+                linear-gradient(180deg, rgba(11, 30, 51, 0.82) 0%, rgba(20, 48, 78, 0.90) 100%),
+                url('https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?auto=format&fit=crop&w=2000&q=85') no-repeat center center/cover;
+            background-blend-mode: screen, screen, screen, normal, normal;
+            opacity: 1;
             z-index: 0;
+            filter: contrast(1.08) brightness(0.95);
+        }
+        .header-hero::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at center, transparent 35%, rgba(9, 23, 38, 0.7) 100%);
+            z-index: 0;
+            pointer-events: none;
         }
         .header-hero .content {
             position: relative;
